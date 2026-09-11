@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sole Pressure Map — Velostat Visualizer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Sole Pressure Map</h1>
+    <p class="subtitle">Velostat Pressure-Sensing Matrix Visualizer</p>
+  </header>
+
+  <main>
+    <!-- ===== Foot Visualisation ===== -->
+    <section class="visualization-section">
+      <div class="foot-container">
+        <svg id="foot-svg" preserveAspectRatio="xMidYMid meet">
+          <!-- Content created dynamically by script.js -->
+        </svg>
+      </div>
+
+      <div class="legend-container">
+        <span class="legend-label">0% pressure</span>
+        <canvas id="legend-canvas" width="256" height="20"></canvas>
+        <span class="legend-label">100% pressure</span>
+      </div>
+    </section>
+
+    <!-- ===== Side panels ===== -->
+    <section class="panels-section">
+
+      <!-- Statistics -->
+      <div class="panel stats-panel">
+        <h2>Statistics</h2>
+        <div class="stat-row">
+          <span class="stat-label">Max Pressure</span>
+          <span class="stat-value" id="stat-max">0%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Average Pressure</span>
+          <span class="stat-value" id="stat-avg">0.0%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Active Cells</span>
+          <span class="stat-value" id="stat-active-cells">0</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="panel controls-panel">
+        <h2>Controls</h2>
+
+        <div class="control-group">
+          <label for="pressure-slider">
+            Brush Pressure: <span id="slider-value">50%</span>
+          </label>
+          <input type="range" id="pressure-slider"
+                 min="0" max="100" value="50" step="1">
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" id="btn-randomize">Randomize</button>
+          <button class="btn btn-secondary" id="btn-clear">Clear / Reset</button>
+        </div>
+      </div>
+
+      <!-- Gait simulation -->
+      <div class="panel simulation-panel">
+        <h2>Gait Simulation</h2>
+        <div class="button-group">
+          <button class="btn btn-primary" id="btn-heel-strike">Heel Strike</button>
+          <button class="btn btn-primary" id="btn-foot-flat">Foot Flat</button>
+          <button class="btn btn-primary" id="btn-forefoot">Forefoot Loading</button>
+          <button class="btn btn-primary" id="btn-toe-off">Toe-Off</button>
+          <button class="btn btn-outline"  id="btn-clear-sole">Clear Sole</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Tooltip (follows cursor / touch) -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
