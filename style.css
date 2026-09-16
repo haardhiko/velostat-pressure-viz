@@ -1,8 +1,7 @@
 /* ============================================================
- *  Velostat Pressure Sole Visualizer – Styles
+ *  Velostat Square Heatmap Visualizer — Styles
  * ============================================================ */
 
-/* --- Reset & base --- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -14,6 +13,9 @@
   --text-dim:    #7a8ba5;
   --accent:      #3b82f6;
   --accent-hover:#2563eb;
+  --green:       #22c55e;
+  --yellow:      #eab308;
+  --red:         #ef4444;
 }
 
 html { font-size: 16px; }
@@ -45,7 +47,7 @@ header h1 {
   margin-top: 0.2rem;
 }
 
-/* --- Main layout --- */
+/* --- Main Layout --- */
 main {
   display: flex;
   flex-wrap: wrap;
@@ -53,65 +55,93 @@ main {
   align-items: flex-start;
   gap: 2rem;
   padding: 1.5rem 1rem 3rem;
-  max-width: 960px;
+  max-width: 920px;
   margin: 0 auto;
 }
 
-/* --- Visualisation column --- */
+/* --- Visualization Section --- */
 .visualization-section {
-  flex: 1 1 280px;
-  max-width: 360px;
+  flex: 1 1 320px;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.foot-container {
+.pad-container {
   width: 100%;
-  max-width: 320px;
+  aspect-ratio: 1 / 1;
+  max-width: 400px;
+  background: var(--surface);
   border: 2px solid var(--border);
   border-radius: 16px;
-  padding: 1rem;
-  background: var(--surface);
+  padding: 10px;
   display: flex;
-  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-#foot-svg {
+#pressure-canvas {
   width: 100%;
-  height: auto;
-  cursor: crosshair;
+  height: 100%;
   display: block;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-#foot-svg rect {
-  transition: fill 0.12s ease;
+.pad-overlay {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  pointer-events: none;
 }
 
-/* --- Colour legend --- */
+.pressure-badge {
+  font-size: 2.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text-dim);
+  transition: color 0.15s, text-shadow 0.15s;
+}
+
+.pressure-desc {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+/* --- Legend --- */
 .legend-container {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-top: 1rem;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
   width: 100%;
-  max-width: 320px;
+  max-width: 400px;
 }
 
 .legend-label {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-dim);
   white-space: nowrap;
+  font-weight: 500;
 }
 
 #legend-canvas {
   flex: 1;
-  height: 18px;
+  height: 16px;
   border-radius: 4px;
   border: 1px solid var(--border);
 }
 
-/* --- Side panels --- */
+/* --- Side Panels --- */
 .panels-section {
   flex: 1 1 280px;
   max-width: 380px;
@@ -128,7 +158,7 @@ main {
 }
 
 .panel h2 {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -136,11 +166,77 @@ main {
   margin-bottom: 0.8rem;
 }
 
-/* --- Statistics --- */
+/* --- Connection --- */
+.connection-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.connection-row label {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.connection-row select {
+  flex: 1;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.82rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+
+.connection-row select:focus { border-color: var(--accent); }
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.status-dot.connected {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+.status-dot.error {
+  background: var(--red);
+  box-shadow: 0 0 6px var(--red);
+}
+
+.status-text {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.serial-hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 0.6rem;
+  line-height: 1.4;
+}
+
+/* --- Stats --- */
 .stat-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.35rem 0;
+  padding: 0.4rem 0;
   border-bottom: 1px solid var(--border);
 }
 
@@ -158,21 +254,50 @@ main {
   color: var(--text);
 }
 
-/* --- Controls --- */
+/* --- Controls / Actions --- */
 .control-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.switch-group {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.8rem;
+}
+
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.calib-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  margin-bottom: 0.6rem;
+  font-size: 0.78rem;
 }
 
 .control-group label {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-dim);
   margin-bottom: 0.4rem;
 }
 
-input[type='range'] {
-  -webkit-appearance: none;
-  appearance: none;
+input[type="range"] {
   width: 100%;
   height: 6px;
   border-radius: 3px;
@@ -181,44 +306,22 @@ input[type='range'] {
   cursor: pointer;
 }
 
-input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid #fff;
-  cursor: pointer;
-}
-
-input[type='range']::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 2px solid #fff;
-  cursor: pointer;
-}
-
-/* --- Buttons --- */
 .button-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
 }
 
 .btn {
-  flex: 1 1 auto;
-  min-width: 100px;
-  padding: 0.55rem 0.8rem;
-  font-size: 0.78rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .btn:active { transform: scale(0.97); }
@@ -234,36 +337,11 @@ input[type='range']::-moz-range-thumb {
   background: var(--surface-alt);
   color: var(--text);
   border: 1px solid var(--border);
+  flex: 1;
 }
 
-.btn-secondary:hover { background: var(--border); }
-
-.btn-outline {
-  background: transparent;
-  color: var(--text-dim);
-  border: 1px solid var(--border);
-}
-
-.btn-outline:hover {
-  background: var(--surface-alt);
-  color: var(--text);
-}
-
-/* --- Tooltip --- */
-.tooltip {
-  display: none;
-  position: fixed;
-  padding: 0.4rem 0.7rem;
-  font-size: 0.78rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.85);
-  border-radius: 6px;
-  pointer-events: none;
-  z-index: 100;
-  white-space: nowrap;
-  backdrop-filter: blur(4px);
+.btn-secondary:hover {
+  background: var(--border);
 }
 
 /* --- Responsive --- */
@@ -281,9 +359,5 @@ input[type='range']::-moz-range-thumb {
     width: 100%;
   }
 
-  .foot-container { max-width: 100%; }
-
   header h1 { font-size: 1.3rem; }
-
-  .btn { min-width: 80px; font-size: 0.74rem; }
 }

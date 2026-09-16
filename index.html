@@ -3,87 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sole Pressure Map — Velostat Visualizer</title>
+  <title>Velostat Pressure Heatmap</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header>
-    <h1>Sole Pressure Map</h1>
-    <p class="subtitle">Velostat Pressure-Sensing Matrix Visualizer</p>
+    <h1>Velostat Pressure Heatmap</h1>
+    <p class="subtitle">Live ESP32 USB Serial Prototype</p>
   </header>
 
   <main>
-    <!-- ===== Foot Visualisation ===== -->
+    <!-- ===== Heatmap Visualizer ===== -->
     <section class="visualization-section">
-      <div class="foot-container">
-        <svg id="foot-svg" preserveAspectRatio="xMidYMid meet">
-          <!-- Content created dynamically by script.js -->
-        </svg>
+      <div class="pad-container">
+        <canvas id="pressure-canvas" width="400" height="400"></canvas>
+        <div class="pad-overlay">
+          <div class="pressure-badge" id="pressure-badge">0%</div>
+          <div class="pressure-desc" id="pressure-desc">IDLE (No Touch)</div>
+        </div>
       </div>
 
       <div class="legend-container">
-        <span class="legend-label">0% pressure</span>
-        <canvas id="legend-canvas" width="256" height="20"></canvas>
-        <span class="legend-label">100% pressure</span>
+        <span class="legend-label">Light (Blue)</span>
+        <canvas id="legend-canvas" width="280" height="18"></canvas>
+        <span class="legend-label">Heavy (Red)</span>
       </div>
     </section>
 
-    <!-- ===== Side panels ===== -->
+    <!-- ===== Controls & Stats ===== -->
     <section class="panels-section">
 
-      <!-- Statistics -->
+      <!-- Serial Connection -->
+      <div class="panel connection-panel">
+        <h2>Serial Connection</h2>
+        <div class="connection-row">
+          <label for="baud-rate">Baud</label>
+          <select id="baud-rate">
+            <option value="9600">9600</option>
+            <option value="57600">57600</option>
+            <option value="115200" selected>115200</option>
+            <option value="230400">230400</option>
+          </select>
+          <button class="btn btn-primary" id="btn-connect">Connect</button>
+        </div>
+        <div class="status-row">
+          <span class="status-dot" id="status-dot"></span>
+          <span class="status-text" id="status-text">Disconnected</span>
+        </div>
+        <p class="serial-hint" id="serial-hint">
+          Connect ESP32 via USB. Works in Google Chrome or Microsoft Edge.
+        </p>
+      </div>
+
+      <!-- Live Statistics -->
       <div class="panel stats-panel">
-        <h2>Statistics</h2>
+        <h2>Live Pressure Data</h2>
         <div class="stat-row">
-          <span class="stat-label">Max Pressure</span>
-          <span class="stat-value" id="stat-max">0%</span>
+          <span class="stat-label">Raw ADC (GPIO32)</span>
+          <span class="stat-value" id="stat-raw">0 / 4095</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Average Pressure</span>
-          <span class="stat-value" id="stat-avg">0.0%</span>
+          <span class="stat-label">Normalized Pressure</span>
+          <span class="stat-value" id="stat-pct">0.0%</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Active Cells</span>
-          <span class="stat-value" id="stat-active-cells">0</span>
+          <span class="stat-label">Peak Pressure</span>
+          <span class="stat-value" id="stat-peak">0.0%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Refresh Rate</span>
+          <span class="stat-value" id="stat-hz">— Hz</span>
         </div>
       </div>
 
-      <!-- Controls -->
-      <div class="panel controls-panel">
-        <h2>Controls</h2>
+      <!-- Quick Actions / Simulation -->
+      <div class="panel actions-panel">
+        <h2>Calibration & Testing</h2>
+
+        <div class="control-group switch-group">
+          <label class="switch-label" for="toggle-invert">
+            <input type="checkbox" id="toggle-invert">
+            <span>Invert ADC (if pressing lowers ADC)</span>
+          </label>
+        </div>
 
         <div class="control-group">
-          <label for="pressure-slider">
-            Brush Pressure: <span id="slider-value">50%</span>
-          </label>
-          <input type="range" id="pressure-slider"
-                 min="0" max="100" value="50" step="1">
+          <label for="test-slider">Manual Slider (Test without ESP32):</label>
+          <input type="range" id="test-slider" min="0" max="4095" value="0">
+        </div>
+
+        <div class="calib-stats">
+          <span class="stat-label">Calibrated Range:</span>
+          <span class="stat-value" id="calib-range">0 — 4095</span>
         </div>
 
         <div class="button-group">
-          <button class="btn btn-secondary" id="btn-randomize">Randomize</button>
-          <button class="btn btn-secondary" id="btn-clear">Clear / Reset</button>
-        </div>
-      </div>
-
-      <!-- Gait simulation -->
-      <div class="panel simulation-panel">
-        <h2>Gait Simulation</h2>
-        <div class="button-group">
-          <button class="btn btn-primary" id="btn-heel-strike">Heel Strike</button>
-          <button class="btn btn-primary" id="btn-foot-flat">Foot Flat</button>
-          <button class="btn btn-primary" id="btn-forefoot">Forefoot Loading</button>
-          <button class="btn btn-primary" id="btn-toe-off">Toe-Off</button>
-          <button class="btn btn-outline"  id="btn-clear-sole">Clear Sole</button>
+          <button class="btn btn-secondary" id="btn-calibrate">Auto-Calibrate</button>
+          <button class="btn btn-secondary" id="btn-reset-peak">Reset Peak</button>
+          <button class="btn btn-secondary" id="btn-zero">Zero</button>
         </div>
       </div>
 
     </section>
   </main>
-
-  <!-- Tooltip (follows cursor / touch) -->
-  <div id="tooltip" class="tooltip"></div>
 
   <script src="script.js"></script>
 </body>
