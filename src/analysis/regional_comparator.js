@@ -70,10 +70,15 @@ function aggregateToFourRegions(sensorInput) {
     };
   }
 
+  // Normalize aliases: midfoot -> arch, forefoot -> ball
+  const normalizedInput = { ...sensorInput };
+  if ('midfoot' in normalizedInput && !('arch' in normalizedInput)) normalizedInput.arch = normalizedInput.midfoot;
+  if ('forefoot' in normalizedInput && !('ball' in normalizedInput)) normalizedInput.ball = normalizedInput.forefoot;
+
   // Check if input uses direct 4-region keys (heel, arch, ball, toes)
   // Input is direct if at least one PRODUCT_REGION key is present and not matching 15-sensor IDs
-  const directKeysPresent = PRODUCT_REGIONS.filter(r => r in sensorInput);
-  const isDirectRegional = directKeysPresent.length > 0 && !('heel_center' in sensorInput);
+  const directKeysPresent = PRODUCT_REGIONS.filter(r => r in normalizedInput);
+  const isDirectRegional = directKeysPresent.length > 0 && !('heel_center' in normalizedInput);
 
   const regionalSums = {};
   const regionDetails = {};
@@ -84,14 +89,14 @@ function aggregateToFourRegions(sensorInput) {
 
   if (isDirectRegional) {
     PRODUCT_REGIONS.forEach((region) => {
-      if (!(region in sensorInput) || sensorInput[region] === null || sensorInput[region] === undefined) {
+      if (!(region in normalizedInput) || normalizedInput[region] === null || normalizedInput[region] === undefined) {
         missingRegions.push(region);
         regionalSums[region] = null;
         regionDetails[region] = { status: 'missing', isMeasured: false, isZero: false, rawSum: null };
         return;
       }
 
-      const raw = sensorInput[region];
+      const raw = normalizedInput[region];
       const val = typeof raw === 'number' ? raw : (raw && typeof raw.value === 'number' ? raw.value : null);
 
       if (val === null || typeof val !== 'number' || !Number.isFinite(val) || val < 0) {

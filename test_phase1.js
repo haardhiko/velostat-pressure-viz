@@ -51,14 +51,14 @@ for (const r of expectedRegions) {
 }
 console.log('PASS: All expected anatomical regions (Toes, Forefoot, Midfoot, Heel) are represented.');
 
-// Verify 15 sensors with unique IDs
+// Verify 4 regional sensors with unique IDs
 const sensorIds = SENSOR_LOCATIONS.map(s => s.id);
 const uniqueSensorIds = new Set(sensorIds);
-if (uniqueSensorIds.size !== 15) {
-  console.error(`FAIL: Expected 15 unique sensor IDs, found ${uniqueSensorIds.size}`);
+if (uniqueSensorIds.size !== 4) {
+  console.error(`FAIL: Expected 4 unique sensor IDs, found ${uniqueSensorIds.size}`);
   process.exit(1);
 }
-console.log('PASS: Exactly 15 unique sensor locations defined.');
+console.log('PASS: Exactly 4 unique sensor locations defined (Toes, Forefoot, Midfoot, Heel).');
 
 // 3. Test independence of sensor states
 const sensors = {};
@@ -66,10 +66,10 @@ SENSOR_LOCATIONS.forEach(loc => {
   sensors[loc.id] = { targetValue: 0, currentValue: 0, peakValue: 0 };
 });
 
-// Update heel_center only
-sensors['heel_center'].targetValue = 0.85;
+// Update heel only
+sensors['heel'].targetValue = 0.85;
 for (const id of sensorIds) {
-  if (id === 'heel_center') {
+  if (id === 'heel') {
     if (sensors[id].targetValue !== 0.85) throw new Error('Heel target mismatch');
   } else {
     if (sensors[id].targetValue !== 0) throw new Error(`Sensor ${id} bled value from heel!`);
@@ -78,12 +78,12 @@ for (const id of sensorIds) {
 console.log('PASS: Sensor value independence verified (pressing heel does not alter toes/arch).');
 
 // 4. Test simultaneous pressure at multiple locations
-sensors['toe_1'].targetValue = 0.95;
-sensors['meta_1'].targetValue = 0.70;
-if (sensors['heel_center'].targetValue === 0.85 &&
-    sensors['toe_1'].targetValue === 0.95 &&
-    sensors['meta_1'].targetValue === 0.70 &&
-    sensors['toe_5'].targetValue === 0) {
+sensors['toes'].targetValue = 0.95;
+sensors['forefoot'].targetValue = 0.70;
+if (sensors['heel'].targetValue === 0.85 &&
+    sensors['toes'].targetValue === 0.95 &&
+    sensors['forefoot'].targetValue === 0.70 &&
+    sensors['midfoot'].targetValue === 0) {
   console.log('PASS: Simultaneous multi-location pressure verified.');
 } else {
   console.error('FAIL: Multi-location state error');

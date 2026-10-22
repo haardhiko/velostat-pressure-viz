@@ -7,54 +7,48 @@
   'use strict';
 
   /* ==========================================================================
-   * 1. Sensor Configuration & Layout (Plantar Right Foot)
+   * 1. Sensor Configuration & Layout (Plantar Right Foot - 4 Regional Sensors)
    * ========================================================================== */
 
   /**
-   * 15 Fixed anatomical sensor locations.
+   * 4 Regional anatomical sensor locations:
+   * 1. Toes: All 5 toes as 1 unified anatomical part (Distal digital crest)
+   * 2. Forefoot: Metatarsal ball pad
+   * 3. Midfoot: Plantar arch / instep
+   * 4. Heel: Calcaneus rearfoot pad
+   *
    * Normalized coordinates (x: 0..1, y: 0..1) relative to foot bounding box:
    * x=0 is medial (big toe side on right plantar view), x=1 is lateral (pinky side)
    * y=0 is distal (toes), y=1 is proximal (heel)
    */
   const SENSOR_LOCATIONS = [
-    // --- Toes (Phalanges) ---
-    { id: 'toe_1', label: 'Big Toe (Hallux)', region: 'Toes', x: 0.33, y: 0.15, radius: 0.075 },
-    { id: 'toe_2', label: 'Second Toe', region: 'Toes', x: 0.48, y: 0.18, radius: 0.050 },
-    { id: 'toe_3', label: 'Third Toe', region: 'Toes', x: 0.60, y: 0.22, radius: 0.046 },
-    { id: 'toe_4', label: 'Fourth Toe', region: 'Toes', x: 0.70, y: 0.26, radius: 0.042 },
-    { id: 'toe_5', label: 'Fifth Toe (Pinky)', region: 'Toes', x: 0.79, y: 0.31, radius: 0.038 },
+    // --- 1. Toes (All 5 Phalanges as 1 Unified Region) ---
+    { id: 'toes', label: 'Toes (Digital Pad)', region: 'Toes', x: 0.50, y: 0.14, radius: 0.12 },
 
-    // --- Forefoot / Ball (Metatarsal Heads) ---
-    { id: 'meta_1', label: '1st Metatarsal (Medial Ball)', region: 'Forefoot', x: 0.34, y: 0.36, radius: 0.075 },
-    { id: 'meta_2', label: '2nd Metatarsal Head', region: 'Forefoot', x: 0.46, y: 0.35, radius: 0.065 },
-    { id: 'meta_3', label: '3rd Metatarsal Head', region: 'Forefoot', x: 0.58, y: 0.36, radius: 0.065 },
-    { id: 'meta_5', label: '5th Metatarsal (Lateral Ball)', region: 'Forefoot', x: 0.76, y: 0.40, radius: 0.070 },
+    // --- 2. Forefoot (Metatarsal Ball) ---
+    { id: 'forefoot', label: 'Forefoot (Ball)', region: 'Forefoot', x: 0.50, y: 0.35, radius: 0.13 },
 
-    // --- Midfoot & Arch ---
-    { id: 'arch_medial', label: 'Medial Arch', region: 'Midfoot', x: 0.38, y: 0.54, radius: 0.065 },
-    { id: 'midfoot_center', label: 'Central Midfoot', region: 'Midfoot', x: 0.53, y: 0.55, radius: 0.065 },
-    { id: 'arch_lateral', label: 'Lateral Midfoot', region: 'Midfoot', x: 0.69, y: 0.56, radius: 0.065 },
+    // --- 3. Midfoot (Plantar Arch) ---
+    { id: 'midfoot', label: 'Midfoot (Arch)', region: 'Midfoot', x: 0.54, y: 0.57, radius: 0.12 },
 
-    // --- Heel (Calcaneus) ---
-    { id: 'heel_medial', label: 'Medial Heel', region: 'Heel', x: 0.43, y: 0.78, radius: 0.070 },
-    { id: 'heel_center', label: 'Heel Center', region: 'Heel', x: 0.53, y: 0.82, radius: 0.080 },
-    { id: 'heel_lateral', label: 'Lateral Heel', region: 'Heel', x: 0.63, y: 0.78, radius: 0.070 }
+    // --- 4. Heel (Calcaneus) ---
+    { id: 'heel', label: 'Heel (Calcaneus)', region: 'Heel', x: 0.53, y: 0.80, radius: 0.13 }
   ];
 
   /* ==========================================================================
-   * 2. State Management
+   * 2. State Management & Sensor Resolution
    * ========================================================================== */
 
   const state = {
     mode: 'simulation', // 'simulation' | 'hardware'
-    selectedSensorId: 'heel_center',
-    focusedSensorIndex: 13, // for keyboard accessibility
+    selectedSensorId: 'heel',
+    focusedSensorIndex: 3, // for keyboard accessibility (0: toes, 1: forefoot, 2: midfoot, 3: heel)
 
     // Per-sensor dynamic values
     sensors: {},
 
     // Hardware connection state
-    hwMappedSensorId: 'heel_center', // The single ESP32 GPIO32 reading maps here
+    hwMappedSensorId: 'heel', // The single ESP32 GPIO32 reading maps here
     hwConnected: false,
     rawADC: 0,
     lastSerialTimestamp: 0,
@@ -69,6 +63,40 @@
     invertADC: false,
     isCalibrating: false
   };
+
+  /**
+   * Resolves sensor IDs across aliases (e.g. legacy 15-sensor names, 'ball'/'arch', etc.)
+   */
+  function resolveSensorId(id) {
+    if (!id || typeof id !== 'string') return null;
+    const clean = id.trim().toLowerCase();
+    if (state.sensors && state.sensors[clean]) return clean;
+    const aliases = {
+      'toes': 'toes',
+      'toe': 'toes',
+      'toe_1': 'toes',
+      'toe_2': 'toes',
+      'toe_3': 'toes',
+      'toe_4': 'toes',
+      'toe_5': 'toes',
+      'forefoot': 'forefoot',
+      'ball': 'forefoot',
+      'meta_1': 'forefoot',
+      'meta_2': 'forefoot',
+      'meta_3': 'forefoot',
+      'meta_5': 'forefoot',
+      'midfoot': 'midfoot',
+      'arch': 'midfoot',
+      'arch_medial': 'midfoot',
+      'arch_lateral': 'midfoot',
+      'midfoot_center': 'midfoot',
+      'heel': 'heel',
+      'heel_center': 'heel',
+      'heel_medial': 'heel',
+      'heel_lateral': 'heel'
+    };
+    return aliases[clean] || null;
+  }
 
   // Initialize sensors state
   SENSOR_LOCATIONS.forEach((loc) => {
@@ -91,8 +119,11 @@
       if (typeof parsed.calibMin === 'number') state.calibMin = parsed.calibMin;
       if (typeof parsed.calibMax === 'number') state.calibMax = parsed.calibMax;
       if (typeof parsed.invertADC === 'boolean') state.invertADC = parsed.invertADC;
-      if (parsed.hwMappedSensorId && state.sensors[parsed.hwMappedSensorId]) {
-        state.hwMappedSensorId = parsed.hwMappedSensorId;
+      if (parsed.hwMappedSensorId) {
+        const resolved = resolveSensorId(parsed.hwMappedSensorId);
+        if (resolved && state.sensors[resolved]) {
+          state.hwMappedSensorId = resolved;
+        }
       }
     }
   } catch (_) {}
@@ -153,8 +184,8 @@
       this.canvas = canvas;
       this.container = footContainer;
       this.ctx = canvas.getContext('2d');
-      this.width = 400;
-      this.height = 780;
+      this.width = 460;
+      this.height = 840;
       this.dpr = window.devicePixelRatio || 1;
 
       this.resize();
@@ -163,9 +194,10 @@
 
     resize() {
       const rect = this.container.getBoundingClientRect();
-      // Maintain roughly 1:1.95 aspect ratio
-      const w = Math.min(rect.width, 420);
-      const h = w * 1.95;
+      // Expanded foot canvas dimensions: width up to 480px, height w * 1.82
+      const availableWidth = rect.width ? Math.max(340, rect.width - 24) : 480;
+      const w = Math.min(availableWidth, 480);
+      const h = Math.round(w * 1.82);
 
       this.width = w;
       this.height = h;
@@ -181,7 +213,11 @@
     }
 
     /**
-     * Draw the complete plantar foot visualization
+     * Draw the complete plantar foot visualization with 4 regions:
+     * 1. All 5 toes as 1 unified digital pad part
+     * 2. Forefoot (Metatarsal ball)
+     * 3. Midfoot (Plantar arch)
+     * 4. Heel (Calcaneus)
      */
     render() {
       const ctx = this.ctx;
@@ -190,13 +226,13 @@
 
       ctx.clearRect(0, 0, w, h);
 
-      // 1. Draw foot sole outline and anatomical regions
+      // 1. Draw foot sole outline with integrated 5-toes unified part, forefoot, midfoot, heel
       this.drawSoleBackground(ctx, w, h);
 
-      // 2. Render localized pressure heatmap for each sensor
+      // 2. Render localized pressure heatmap for each sensor (clipped to sole)
       this.drawPressureHeatmap(ctx, w, h);
 
-      // 3. Draw anatomical zone boundary lines
+      // 3. Draw anatomical zone boundary lines and region titles
       this.drawZoneDividers(ctx, w, h);
 
       // 4. Draw sensor location nodes and labels
@@ -204,88 +240,119 @@
     }
 
     /**
-     * Plantar sole path for a right foot
+     * Plantar sole path for a right foot with unified 5-toes digital pad at the top
      */
     traceSolePath(ctx, w, h) {
       ctx.beginPath();
-      // Start medial ball base
-      ctx.moveTo(w * 0.24, h * 0.32);
+      // Start at Medial Heel
+      ctx.moveTo(w * 0.36, h * 0.70);
 
-      // Medial ball & arch indent
-      ctx.bezierCurveTo(w * 0.22, h * 0.40, w * 0.35, h * 0.50, w * 0.36, h * 0.62);
+      // Medial Arch: sweeps inward gracefully
+      ctx.bezierCurveTo(w * 0.36, h * 0.60, w * 0.28, h * 0.48, w * 0.25, h * 0.38);
 
-      // Medial heel transition
-      ctx.bezierCurveTo(w * 0.36, h * 0.72, w * 0.37, h * 0.80, w * 0.43, h * 0.88);
+      // Medial Forefoot / 1st Metatarsal head bulge
+      ctx.bezierCurveTo(w * 0.22, h * 0.32, w * 0.22, h * 0.24, w * 0.24, h * 0.20);
 
-      // Rounded heel bottom
-      ctx.bezierCurveTo(w * 0.47, h * 0.92, w * 0.59, h * 0.92, w * 0.65, h * 0.87);
+      // Medial Hallux (Big Toe) edge curving up
+      ctx.bezierCurveTo(w * 0.25, h * 0.14, w * 0.28, h * 0.08, w * 0.36, h * 0.06);
 
-      // Lateral heel & border
-      ctx.bezierCurveTo(w * 0.72, h * 0.80, w * 0.73, h * 0.68, w * 0.75, h * 0.58);
-      ctx.bezierCurveTo(w * 0.77, h * 0.48, w * 0.82, h * 0.39, w * 0.83, h * 0.32);
+      // Unified 5-Toe Crest across all 5 toes (Big toe to 5th toe cascade)
+      ctx.bezierCurveTo(w * 0.44, h * 0.05, w * 0.52, h * 0.07, w * 0.60, h * 0.10);
+      ctx.bezierCurveTo(w * 0.68, h * 0.13, w * 0.76, h * 0.17, w * 0.81, h * 0.22);
 
-      // Anterior metatarsal arch / ball curve
-      ctx.bezierCurveTo(w * 0.75, h * 0.29, w * 0.55, h * 0.28, w * 0.38, h * 0.28);
-      ctx.bezierCurveTo(w * 0.28, h * 0.28, w * 0.25, h * 0.30, w * 0.24, h * 0.32);
+      // Lateral 5th toe & Lateral Forefoot bulge (5th Metatarsal head)
+      ctx.bezierCurveTo(w * 0.84, h * 0.26, w * 0.84, h * 0.32, w * 0.82, h * 0.38);
+
+      // Lateral Midfoot / Arch border
+      ctx.bezierCurveTo(w * 0.80, h * 0.48, w * 0.77, h * 0.58, w * 0.74, h * 0.68);
+
+      // Lateral Heel
+      ctx.bezierCurveTo(w * 0.72, h * 0.78, w * 0.68, h * 0.86, w * 0.62, h * 0.90);
+
+      // Rounded Heel bottom
+      ctx.bezierCurveTo(w * 0.56, h * 0.93, w * 0.46, h * 0.93, w * 0.40, h * 0.90);
+
+      // Medial Heel curve back to start
+      ctx.bezierCurveTo(w * 0.35, h * 0.85, w * 0.34, h * 0.78, w * 0.36, h * 0.70);
       ctx.closePath();
     }
 
     drawSoleBackground(ctx, w, h) {
       ctx.save();
 
-      // Draw Main Sole
+      // Draw Main Insole Silhouette
       this.traceSolePath(ctx, w, h);
       ctx.fillStyle = '#0b1329';
       ctx.fill();
       ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 2.0;
       ctx.stroke();
 
-      // Draw 5 Individual Toes
-      const toes = [
-        { x: 0.33, y: 0.15, rx: 0.078, ry: 0.098, rot: -0.08 }, // Hallux
-        { x: 0.48, y: 0.18, rx: 0.046, ry: 0.068, rot: -0.04 }, // Toe 2
-        { x: 0.60, y: 0.22, rx: 0.042, ry: 0.058, rot: 0.02 },  // Toe 3
-        { x: 0.70, y: 0.26, rx: 0.038, ry: 0.052, rot: 0.08 },  // Toe 4
-        { x: 0.79, y: 0.31, rx: 0.035, ry: 0.046, rot: 0.15 }   // Toe 5
-      ];
-
-      toes.forEach((t) => {
-        ctx.beginPath();
-        ctx.ellipse(w * t.x, h * t.y, w * t.rx, h * t.ry, t.rot, 0, Math.PI * 2);
-        ctx.fillStyle = '#0b1329';
-        ctx.fill();
-        ctx.strokeStyle = '#1e293b';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      });
+      // Highlight the Unified 5-Toes Part as 1 Contoured Region at the top
+      ctx.beginPath();
+      ctx.moveTo(w * 0.24, h * 0.21);
+      ctx.bezierCurveTo(w * 0.24, h * 0.14, w * 0.27, h * 0.08, w * 0.36, h * 0.06);
+      ctx.bezierCurveTo(w * 0.44, h * 0.05, w * 0.52, h * 0.07, w * 0.60, h * 0.10);
+      ctx.bezierCurveTo(w * 0.68, h * 0.13, w * 0.76, h * 0.17, w * 0.81, h * 0.22);
+      ctx.bezierCurveTo(w * 0.83, h * 0.24, w * 0.81, h * 0.25, w * 0.78, h * 0.25);
+      // Metatarsal sulcus / crease boundary
+      ctx.bezierCurveTo(w * 0.64, h * 0.24, w * 0.44, h * 0.22, w * 0.24, h * 0.21);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
 
       ctx.restore();
     }
 
     drawZoneDividers(ctx, w, h) {
       ctx.save();
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([5, 4]);
 
-      // Dividing line: Forefoot / Midfoot
+      // 1. Dividing line: Toes / Forefoot (Metatarsal Crease)
       ctx.beginPath();
-      ctx.moveTo(w * 0.28, h * 0.46);
-      ctx.lineTo(w * 0.77, h * 0.46);
+      ctx.moveTo(w * 0.24, h * 0.21);
+      ctx.bezierCurveTo(w * 0.44, h * 0.22, w * 0.64, h * 0.24, w * 0.81, h * 0.24);
       ctx.stroke();
 
-      // Dividing line: Midfoot / Heel
+      // 2. Dividing line: Forefoot / Midfoot
       ctx.beginPath();
-      ctx.moveTo(w * 0.36, h * 0.68);
-      ctx.lineTo(w * 0.73, h * 0.68);
+      ctx.moveTo(w * 0.26, h * 0.46);
+      ctx.bezierCurveTo(w * 0.44, h * 0.47, w * 0.62, h * 0.47, w * 0.78, h * 0.46);
       ctx.stroke();
+
+      // 3. Dividing line: Midfoot / Heel
+      ctx.beginPath();
+      ctx.moveTo(w * 0.35, h * 0.68);
+      ctx.bezierCurveTo(w * 0.48, h * 0.69, w * 0.62, h * 0.69, w * 0.74, h * 0.68);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+
+      // Anatomical Region Watermark Badges
+      ctx.font = '700 10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.38)';
+
+      ctx.fillText('TOES (ALL 5 DIGITS)', w * 0.50, h * 0.08);
+      ctx.fillText('FOREFOOT (BALL)', w * 0.50, h * 0.44);
+      ctx.fillText('MIDFOOT (ARCH)', w * 0.54, h * 0.66);
+      ctx.fillText('HEEL (CALCANEUS)', w * 0.53, h * 0.89);
 
       ctx.restore();
     }
 
     drawPressureHeatmap(ctx, w, h) {
       ctx.save();
+
+      // Clip heatmap strictly inside anatomical foot contour
+      this.traceSolePath(ctx, w, h);
+      ctx.clip();
 
       // Render radial pressure diffusion for each active sensor
       SENSOR_LOCATIONS.forEach((loc) => {
@@ -297,12 +364,12 @@
         const cx = loc.x * w;
         const cy = loc.y * h;
         const baseRadius = loc.radius * w;
-        const radius = baseRadius * (1.1 + val * 1.5);
+        const radius = baseRadius * (1.1 + val * 1.6);
         const rgb = pressureToRGB(val);
 
         const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        const alphaCore = Math.min(0.9, 0.25 + val * 0.65);
-        const alphaMid = Math.min(0.6, val * 0.45);
+        const alphaCore = Math.min(0.92, 0.30 + val * 0.65);
+        const alphaMid = Math.min(0.65, val * 0.50);
 
         grad.addColorStop(0.0, `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alphaCore})`);
         const midRGB = pressureToRGB(val * 0.6);
@@ -318,8 +385,8 @@
         if (val > 0.15) {
           ctx.beginPath();
           ctx.arc(cx, cy, radius * 0.55, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${val * 0.4})`;
-          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${val * 0.5})`;
+          ctx.lineWidth = 1.4;
           ctx.stroke();
         }
       });
@@ -339,24 +406,24 @@
         const isFocused = (idx === state.focusedSensorIndex);
         const isHwMapped = (state.mode === 'hardware' && loc.id === state.hwMappedSensorId);
 
-        const nodeRadius = 8;
+        const nodeRadius = 14;
 
         // Selection ring
         if (isSelected || isFocused) {
           ctx.beginPath();
-          ctx.arc(cx, cy, nodeRadius + 5, 0, Math.PI * 2);
+          ctx.arc(cx, cy, nodeRadius + 6, 0, Math.PI * 2);
           ctx.strokeStyle = isSelected ? '#38bdf8' : '#94a3b8';
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 2.5;
           ctx.stroke();
         }
 
-        // Hardware active badge indicator
+        // Hardware active badge indicator ring
         if (isHwMapped) {
           ctx.beginPath();
-          ctx.arc(cx, cy, nodeRadius + 9, 0, Math.PI * 2);
+          ctx.arc(cx, cy, nodeRadius + 10, 0, Math.PI * 2);
           ctx.strokeStyle = state.hwConnected ? '#22c55e' : '#eab308';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([2, 3]);
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([3, 3]);
           ctx.stroke();
           ctx.setLineDash([]);
         }
@@ -369,35 +436,42 @@
           const rgb = pressureToRGB(val);
           ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
           ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 2;
         } else {
-          // Inactive / neutral
-          if (state.mode === 'hardware' && !isHwMapped) {
-            ctx.fillStyle = '#111827';
-            ctx.strokeStyle = '#334155';
-            ctx.lineWidth = 1;
-          } else {
-            ctx.fillStyle = '#1e293b';
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 1;
-          }
+          ctx.fillStyle = '#1e293b';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.5;
         }
         ctx.fill();
         ctx.stroke();
 
-        // Node short label
-        ctx.font = '9px Consolas, monospace';
+        // Node letter label
+        ctx.font = '700 11px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        ctx.fillStyle = (val > 0.35) ? '#050a14' : '#f8fafc';
 
-        if (val > 0.3) {
-          ctx.fillStyle = '#050a14';
-        } else {
-          ctx.fillStyle = (state.mode === 'hardware' && !isHwMapped) ? '#64748b' : '#cbd5e1';
-        }
+        const nodeLetter = ['T', 'F', 'M', 'H'][idx] || loc.region[0];
+        ctx.fillText(nodeLetter, cx, cy);
 
-        const shortId = loc.id.replace('meta_', 'M').replace('toe_', 'T').replace('arch_', 'A-').replace('heel_', 'H-').replace('midfoot_', 'MF');
-        ctx.fillText(shortId, cx, cy);
+        // Value / region pill badge below node
+        const pctText = `${Math.round(val * 100)}%`;
+        ctx.font = '600 10px Inter, sans-serif';
+        const textWidth = ctx.measureText(pctText).width;
+        const badgeW = textWidth + 14;
+        const badgeH = 18;
+        const badgeY = cy + nodeRadius + 8;
+
+        ctx.fillStyle = isSelected ? '#111827' : 'rgba(15, 23, 42, 0.85)';
+        ctx.strokeStyle = isSelected ? '#38bdf8' : 'rgba(148, 163, 184, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(cx - badgeW / 2, badgeY, badgeW, badgeH, 9);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = isSelected ? '#38bdf8' : (val > 0.05 ? '#22c55e' : '#94a3b8');
+        ctx.fillText(pctText, cx, badgeY + badgeH / 2);
       });
 
       ctx.restore();
@@ -419,8 +493,8 @@
         const dy = (loc.y - y);
         const d = Math.sqrt(dx * dx + dy * dy);
 
-        // Click radius threshold (0.09 in normalized space)
-        if (d < 0.09 && d < minDistance) {
+        // Generous touch/click radius threshold for 4 regions
+        if (d < 0.16 && d < minDistance) {
           minDistance = d;
           closest = loc;
         }
@@ -537,8 +611,9 @@
         const updates = {};
         pairs.forEach(p => {
           const [k, v] = p.split(':');
+          const resolved = resolveSensorId(k);
           const num = parseInt(v, 10);
-          if (k && !isNaN(num)) updates[k.trim()] = num;
+          if (resolved && !isNaN(num)) updates[resolved] = num;
         });
         this.onLineReceived({ type: 'multichannel_named', data: updates });
         return;
@@ -879,48 +954,40 @@
     });
 
     const setVal = (id, val) => {
-      if (state.sensors[id]) {
-        state.sensors[id].targetValue = val;
-        if (val > state.sensors[id].peakValue) state.sensors[id].peakValue = val;
+      const resolved = resolveSensorId(id);
+      if (resolved && state.sensors[resolved]) {
+        state.sensors[resolved].targetValue = val;
+        if (val > state.sensors[resolved].peakValue) state.sensors[resolved].peakValue = val;
       }
     };
 
     switch (presetName) {
       case 'heel': // Heel strike
-        setVal('heel_center', 0.90);
-        setVal('heel_medial', 0.70);
-        setVal('heel_lateral', 0.65);
+        setVal('heel', 0.90);
+        setVal('midfoot', 0.05);
+        setVal('forefoot', 0.00);
+        setVal('toes', 0.00);
         break;
 
       case 'mid': // Midstance
-        setVal('heel_center', 0.35);
-        setVal('arch_lateral', 0.50);
-        setVal('midfoot_center', 0.30);
-        setVal('meta_1', 0.65);
-        setVal('meta_2', 0.70);
-        setVal('meta_3', 0.65);
-        setVal('meta_5', 0.60);
-        setVal('toe_1', 0.25);
+        setVal('heel', 0.40);
+        setVal('midfoot', 0.35);
+        setVal('forefoot', 0.70);
+        setVal('toes', 0.30);
         break;
 
       case 'toe': // Toe off
-        setVal('meta_1', 0.85);
-        setVal('meta_2', 0.80);
-        setVal('toe_1', 0.95);
-        setVal('toe_2', 0.60);
+        setVal('heel', 0.00);
+        setVal('midfoot', 0.05);
+        setVal('forefoot', 0.80);
+        setVal('toes', 0.95);
         break;
 
       case 'full': // Full contact
-        setVal('heel_center', 0.65);
-        setVal('heel_medial', 0.55);
-        setVal('heel_lateral', 0.55);
-        setVal('arch_lateral', 0.45);
-        setVal('meta_1', 0.75);
-        setVal('meta_2', 0.70);
-        setVal('meta_3', 0.70);
-        setVal('meta_5', 0.65);
-        setVal('toe_1', 0.60);
-        setVal('toe_2', 0.40);
+        setVal('heel', 0.65);
+        setVal('midfoot', 0.25);
+        setVal('forefoot', 0.70);
+        setVal('toes', 0.50);
         break;
     }
 
