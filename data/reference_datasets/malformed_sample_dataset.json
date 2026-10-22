@@ -1,0 +1,61 @@
+{
+  "dataset_id": "TEST-MALFORMED-V1",
+  "name": "Malformed Test Dataset for Ingestion Validation",
+  "version": "1.0.0",
+  "unit": "normalized",
+  "records": [
+    {
+      "record_id": "REC-VALID-01",
+      "pattern": "Valid Record in Mixed Batch",
+      "pressures": {
+        "heel_center": 0.50,
+        "meta_1": 0.50
+      }
+    },
+    {
+      "record_id": "REC-BAD-UNIT",
+      "pattern": "Unsupported Unit Record",
+      "unit": "psi_pounds",
+      "pressures": {
+        "heel_center": 15.0
+      }
+    },
+    {
+      "record_id": "REC-VALID-01",
+      "pattern": "Duplicate ID of REC-VALID-01",
+      "pressures": {
+        "heel_center": 0.70
+      }
+    },
+    {
+      "pattern": "Missing record_id field entirely",
+      "pressures": {
+        "heel_center": 0.40
+      }
+    },
+    {
+      "record_id": "REC-BAD-NONFINITE",
+      "pattern": "Contains non-finite or string numbers",
+      "pressures": {
+        "heel_center": "0.85",
+        "meta_1": null
+      }
+    },
+    {
+      "record_id": "REC-BAD-RANGE",
+      "pattern": "Normalized value out of bounds [0.0, 1.0]",
+      "pressures": {
+        "heel_center": 1.45,
+        "meta_1": -0.10
+      }
+    },
+    {
+      "record_id": "REC-BAD-SENSOR",
+      "pattern": "Contains unmapped sensor location",
+      "pressures": {
+        "knee_joint": 0.50,
+        "heel_center": 0.50
+      }
+    }
+  ]
+}

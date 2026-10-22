@@ -3,110 +3,485 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Velostat Pressure Heatmap</title>
+  <title>Velostat Plantar Pressure Map & Biomechanical Analysis</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
+  <!-- ===== 1. Header Navigation ===== -->
   <header>
-    <h1>Velostat Pressure Heatmap</h1>
-    <p class="subtitle">Live ESP32 USB Serial Prototype</p>
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Velostat Plantar Pressure Map</h1>
+          <p class="subtitle">Clinical Gait Telemetry &middot; Knee Defect Diagnostics &middot; NVIDIA AI</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Mode Switcher -->
+        <div class="mode-switcher" role="tablist" aria-label="Sensor Mode">
+          <button class="mode-btn active" id="mode-simulation" role="tab" aria-selected="true">Simulation</button>
+          <button class="mode-btn" id="mode-hardware" role="tab" aria-selected="false">ESP32 Hardware</button>
+        </div>
+
+        <!-- Settings Button -->
+        <button class="btn btn-settings" id="btn-open-settings" aria-label="Open NVIDIA AI Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span>NVIDIA AI</span>
+          <span class="status-indicator-dot" id="api-status-pill"></span>
+        </button>
+      </div>
+    </div>
   </header>
 
   <main>
-    <!-- ===== Heatmap Visualizer ===== -->
-    <section class="visualization-section">
-      <div class="pad-container">
-        <canvas id="pressure-canvas" width="400" height="400"></canvas>
-        <div class="pad-overlay">
-          <div class="pressure-badge" id="pressure-badge">0%</div>
-          <div class="pressure-desc" id="pressure-desc">IDLE (No Touch)</div>
+    <!-- ===== 2. Top Banner: 30-Second Walking Gait Calibration & Knee Diagnostics ===== -->
+    <section class="test-banner-card" id="test-banner-card">
+      <div class="test-card-header">
+        <div class="test-header-titles">
+          <div class="badge-row">
+            <span class="pill-badge pill-cyan">CALIBRATION PROTOCOL</span>
+            <span class="pill-badge pill-purple">CLINICAL REFERENCE DATASETS</span>
+            <span class="pill-badge pill-emerald">NVIDIA NIM LLAMA-3.1</span>
+          </div>
+          <h2>30-Second Walking Gait Calibration & Knee Defect Diagnostics</h2>
+          <p class="test-description">
+            Put on your insole sensor and walk at your natural, comfortable pace for 30 seconds. The system records 4-region plantar pressure telemetry (toes, forefoot, midfoot, heel), computes ground reaction force vectors, and cross-references clinical reference datasets to identify potential knee defects, joint stress, and gait anomalies.
+          </p>
+        </div>
+
+        <div class="test-actions-group">
+          <button class="btn btn-hero" id="btn-start-test">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span>START 30-SECOND TEST</span>
+          </button>
+          <button class="btn btn-danger" id="btn-cancel-test" style="display: none;">Cancel</button>
         </div>
       </div>
 
-      <div class="legend-container">
-        <span class="legend-label">Light (Blue)</span>
-        <canvas id="legend-canvas" width="280" height="18"></canvas>
-        <span class="legend-label">Heavy (Red)</span>
+      <!-- Live Test Progress & Countdown (Active during 30s) -->
+      <div class="test-progress-container" id="test-progress-container" style="display: none;">
+        <div class="timer-row">
+          <div class="timer-display">
+            <span class="timer-number" id="test-timer">30s</span>
+            <span class="timer-caption">REMAINING</span>
+          </div>
+          <div class="live-status-pill pulsing">
+            <span class="pulse-dot"></span>
+            <span id="test-status-text">RECORDING GAIT TELEMETRY &middot; WALK NATURALLY</span>
+          </div>
+          <div class="test-telemetry-stats">
+            <div class="tele-item">
+              <span class="tele-label">Strides Detected</span>
+              <span class="tele-val mono" id="test-steps-count">0</span>
+            </div>
+            <div class="tele-item">
+              <span class="tele-label">Peak Heel Force</span>
+              <span class="tele-val mono" id="test-peak-heel">0.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="test-progress-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Loading Animation Container (Awaiting Analysis) -->
+      <div class="test-loading-container" id="test-loading-container" style="display: none;">
+        <div class="loading-radar">
+          <div class="radar-circle circle-1"></div>
+          <div class="radar-circle circle-2"></div>
+          <div class="radar-circle circle-3"></div>
+          <div class="radar-sweep"></div>
+        </div>
+        <div class="loading-text-group">
+          <h3 id="loading-spinner">Processing 30-Second Gait Telemetry...</h3>
+          <p class="loading-sub" id="loading-stage-text">
+            Comparing with reference datasets (Parkinson's VGRF, GaitRite, Healthy Control benchmarks)...
+          </p>
+        </div>
+      </div>
+
+      <!-- Diagnostic Results Output Card (Displayed when analysis completes) -->
+      <div class="test-results-container" id="test-results-container" style="display: none;">
+        <div class="results-header-banner">
+          <div class="verdict-group">
+            <span class="verdict-tag" id="results-verdict-badge">CLINICAL EVALUATION COMPLETE</span>
+            <h3 id="results-verdict-title">Bilateral Gait Dynamics & Knee Defect Report</h3>
+          </div>
+          <div class="health-index-card">
+            <span class="index-label">GAIT HEALTH INDEX</span>
+            <span class="index-number" id="results-health-index">82 / 100</span>
+          </div>
+        </div>
+
+        <!-- Knee Defect & Lower Extremity Joint Cards -->
+        <div class="knee-defects-grid">
+          <div class="defect-card" id="card-medial-oa">
+            <div class="defect-header">
+              <h4>Medial Knee Compartment Overload</h4>
+              <span class="risk-badge" id="risk-medial-oa">Low Risk</span>
+            </div>
+            <p class="defect-desc">
+              Evaluates excessive pronation and medial forefoot loading which elevates the Knee Adduction Moment (KAM), focusing destructive stresses on the medial meniscus and cartilage (Knee OA risk).
+            </p>
+          </div>
+
+          <div class="defect-card" id="card-patellar">
+            <div class="defect-header">
+              <h4>Patellofemoral Tracking Stress</h4>
+              <span class="risk-badge" id="risk-patellar">Normal</span>
+            </div>
+            <p class="defect-desc">
+              Measures midfoot arch collapse triggering excessive internal tibial torque, leading to anterior knee discomfort and patellar maltracking.
+            </p>
+          </div>
+
+          <div class="defect-card" id="card-impact">
+            <div class="defect-header">
+              <h4>Calcaneal Impact & Shock Transmission</h4>
+              <span class="risk-badge" id="risk-impact-shock">Normal</span>
+            </div>
+            <p class="defect-desc">
+              Detects sharp heel strikes without muscular damping, radiating unattenuated ground reaction shockwaves through the tibia into the knee meniscus.
+            </p>
+          </div>
+
+          <div class="defect-card" id="card-pronation">
+            <div class="defect-header">
+              <h4>Pronation & Arch Collapse Dynamics</h4>
+              <span class="risk-badge" id="risk-pronation">Neutral</span>
+            </div>
+            <p class="defect-desc">
+              Quantifies midfoot load ratio relative to forefoot/heel to distinguish pes planus (flatfoot collapse) from pes cavus (rigid high-arch supination).
+            </p>
+          </div>
+        </div>
+
+        <!-- 4-Region Telemetry vs Reference Dataset -->
+        <div class="comparison-section">
+          <h4>Plantar Load Distribution vs. Reference Dataset Benchmarks</h4>
+          <div class="bars-grid">
+            <div class="bar-col">
+              <span class="bar-region">TOES (DIGITS)</span>
+              <div class="bar-track">
+                <div class="bar-fill bar-toes" id="bar-toes-fill" style="height: 20%;"></div>
+              </div>
+              <span class="bar-val mono" id="bar-toes-val">20.0%</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-region">FOREFOOT (BALL)</span>
+              <div class="bar-track">
+                <div class="bar-fill bar-forefoot" id="bar-forefoot-fill" style="height: 38%;"></div>
+              </div>
+              <span class="bar-val mono" id="bar-forefoot-val">38.0%</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-region">MIDFOOT (ARCH)</span>
+              <div class="bar-track">
+                <div class="bar-fill bar-midfoot" id="bar-midfoot-fill" style="height: 14%;"></div>
+              </div>
+              <span class="bar-val mono" id="bar-midfoot-val">14.0%</span>
+            </div>
+            <div class="bar-col">
+              <span class="bar-region">HEEL (CALCANEUS)</span>
+              <div class="bar-track">
+                <div class="bar-fill bar-heel" id="bar-heel-fill" style="height: 28%;"></div>
+              </div>
+              <span class="bar-val mono" id="bar-heel-val">28.0%</span>
+            </div>
+          </div>
+          <div class="dataset-citation-box">
+            <span class="citation-label">CLOSEST REFERENCE MATCH:</span>
+            <span class="citation-value" id="results-dataset-citation">REC-GS-01 &middot; Standard Plantar Gait Reference Patterns</span>
+          </div>
+        </div>
+
+        <!-- NVIDIA AI Clinical Narrative -->
+        <div class="llm-narrative-box">
+          <div class="narrative-header">
+            <div class="narrative-title-group">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
+                <path d="M12 12L2.1 12.5" />
+              </svg>
+              <h4>NVIDIA AI Clinical Interpretation & Orthotic Recommendations</h4>
+            </div>
+            <span class="model-badge" id="results-model-badge">meta/llama-3.1-70b-instruct</span>
+          </div>
+          <div class="narrative-content" id="results-llm-narrative">
+            Loading clinical narrative...
+          </div>
+        </div>
+
+        <div class="results-actions">
+          <button class="btn btn-secondary" id="btn-retest">Run New 30-Second Walk</button>
+          <button class="btn btn-secondary" id="btn-export-report">Export Full Diagnostic Report</button>
+        </div>
       </div>
     </section>
 
-    <!-- ===== Controls & Stats ===== -->
-    <section class="panels-section">
+    <!-- ===== 3. Workspace: Foot Visualizer (Left) + Side Panels (Right) ===== -->
+    <div class="workspace-grid">
 
-      <!-- Serial Connection -->
-      <div class="panel connection-panel">
-        <h2>Serial Connection</h2>
-        <div class="connection-row">
-          <label for="baud-rate">Baud</label>
-          <select id="baud-rate">
-            <option value="9600">9600</option>
-            <option value="57600">57600</option>
-            <option value="115200" selected>115200</option>
-            <option value="230400">230400</option>
-          </select>
-          <button class="btn btn-primary" id="btn-connect">Connect</button>
+      <!-- Left Column: Foot Anatomical Visualizer -->
+      <section class="visualization-section" aria-label="Plantar Pressure Visualization">
+        <div class="stage-tag-row">
+          <span class="stage-tag">RIGHT FOOT &middot; PLANTAR VIEW</span>
+          <span class="stage-channels-tag">4 REGIONS: TOES &middot; FOREFOOT &middot; MIDFOOT &middot; HEEL</span>
         </div>
-        <div class="status-row">
-          <span class="status-dot" id="status-dot"></span>
-          <span class="status-text" id="status-text">Disconnected</span>
+
+        <div class="pad-container foot-container" id="foot-container">
+          <canvas id="foot-canvas" width="400" height="740" tabindex="0" role="img"
+            aria-label="Plantar pressure heatmap. Click on any of the 4 regions (Toes, Forefoot, Midfoot, Heel) to inspect."></canvas>
+          <!-- Alias canvas for legacy test suites -->
+          <canvas id="pressure-canvas" width="1" height="1" style="display:none;"></canvas>
+
+          <div class="pad-overlay">
+            <div class="pressure-badge" id="pressure-badge">0%</div>
+            <div class="pressure-desc" id="pressure-desc">IDLE (No Touch)</div>
+          </div>
         </div>
-        <p class="serial-hint" id="serial-hint">
-          Connect ESP32 via USB. Works in Google Chrome or Microsoft Edge.
+
+        <div class="legend-container">
+          <span class="legend-label">0% (Rest)</span>
+          <canvas id="legend-canvas" width="280" height="16"></canvas>
+          <span class="legend-label">100% (Peak)</span>
+        </div>
+
+        <p class="viz-note" id="viz-note">
+          Simulation Mode &mdash; Click or drag on Toes, Forefoot, Midfoot, or Heel to test pressure response.
         </p>
-      </div>
+      </section>
 
-      <!-- Live Statistics -->
-      <div class="panel stats-panel">
-        <h2>Live Pressure Data</h2>
-        <div class="stat-row">
-          <span class="stat-label">Raw ADC (GPIO32)</span>
-          <span class="stat-value" id="stat-raw">0 / 4095</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Normalized Pressure</span>
-          <span class="stat-value" id="stat-pct">0.0%</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Peak Pressure</span>
-          <span class="stat-value" id="stat-peak">0.0%</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Refresh Rate</span>
-          <span class="stat-value" id="stat-hz">— Hz</span>
-        </div>
-      </div>
+      <!-- Right Column: Analytics & Hardware Controls -->
+      <section class="panels-section">
 
-      <!-- Quick Actions / Simulation -->
-      <div class="panel actions-panel">
-        <h2>Calibration & Testing</h2>
-
-        <div class="control-group switch-group">
-          <label class="switch-label" for="toggle-invert">
-            <input type="checkbox" id="toggle-invert">
-            <span>Invert ADC (if pressing lowers ADC)</span>
-          </label>
+        <!-- Selected Sensor Node Panel -->
+        <div class="panel" id="sensor-info-panel">
+          <h2>SELECTED ANATOMICAL SENSOR</h2>
+          <div id="no-selection" class="no-selection" style="display: none;">
+            Click on Toes, Forefoot, Midfoot, or Heel
+          </div>
+          <div id="sensor-details" class="sensor-details">
+            <div class="stat-row">
+              <span class="stat-label">Sensor ID</span>
+              <span class="stat-value mono" id="info-id">heel</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Anatomical Label</span>
+              <span class="stat-value" id="info-label">Heel (Calcaneus)</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Product Region</span>
+              <span class="stat-value" id="info-region">Heel</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Raw ADC Reading</span>
+              <span class="stat-value mono" id="info-raw">Simulated</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Normalized Load</span>
+              <span class="stat-value mono" id="info-normalized">0.0%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Peak Recorded</span>
+              <span class="stat-value mono" id="info-peak">0.0%</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Data Source</span>
+              <span class="stat-value" id="info-source">Simulated</span>
+            </div>
+          </div>
         </div>
 
-        <div class="control-group">
-          <label for="test-slider">Manual Slider (Test without ESP32):</label>
-          <input type="range" id="test-slider" min="0" max="4095" value="0">
+        <!-- Serial Connection Panel -->
+        <div class="panel connection-panel">
+          <h2>ESP32 USB Serial Connection</h2>
+          <div class="connection-row">
+            <label for="baud-rate">Baud</label>
+            <select id="baud-rate">
+              <option value="9600">9600</option>
+              <option value="57600">57600</option>
+              <option value="115200" selected>115200</option>
+              <option value="230400">230400</option>
+            </select>
+            <button class="btn btn-primary" id="btn-connect">Connect</button>
+          </div>
+          <div class="status-row">
+            <span class="status-dot" id="status-dot"></span>
+            <span class="status-text" id="status-text">Disconnected</span>
+            <span id="stat-connection-label" style="display: none;">Disconnected</span>
+          </div>
+          <p class="serial-hint" id="serial-hint">
+            Connect ESP32 via USB cable. Web Serial API works directly in Chrome or Edge.
+          </p>
+
+          <div class="control-group" style="margin-top: 10px;">
+            <label for="hw-channel-sensor">Physical Sensor Mapped Region:</label>
+            <select id="hw-channel-sensor"></select>
+          </div>
         </div>
 
-        <div class="calib-stats">
-          <span class="stat-label">Calibrated Range:</span>
-          <span class="stat-value" id="calib-range">0 — 4095</span>
+        <!-- Live Metrics Panel -->
+        <div class="panel stats-panel">
+          <h2>Live Pressure Telemetry</h2>
+          <div class="stat-row">
+            <span class="stat-label">Active Sensors</span>
+            <span class="stat-value mono" id="stat-active">0 / 4</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Hardware Channels</span>
+            <span class="stat-value mono" id="stat-hw-channels">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Peak Load</span>
+            <span class="stat-value mono" id="stat-max-pressure">0.0%</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Peak Region</span>
+            <span class="stat-value" id="stat-max-location">&mdash;</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Sampling Rate</span>
+            <span class="stat-value mono" id="stat-hz">&mdash; Hz</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Data Freshness</span>
+            <span class="stat-value" id="stat-freshness">Interactive (Sim)</span>
+          </div>
+          <!-- Hidden aliases for backward test compatibility -->
+          <div style="display: none;">
+            <span id="stat-raw">0 / 4095</span>
+            <span id="stat-pct">0.0%</span>
+            <span id="stat-peak">0.0%</span>
+          </div>
         </div>
 
-        <div class="button-group">
-          <button class="btn btn-secondary" id="btn-calibrate">Auto-Calibrate</button>
-          <button class="btn btn-secondary" id="btn-reset-peak">Reset Peak</button>
-          <button class="btn btn-secondary" id="btn-zero">Zero</button>
-        </div>
-      </div>
+        <!-- Simulation & Calibration Controls -->
+        <div class="panel actions-panel">
+          <h2>Simulation & Calibration</h2>
 
-    </section>
+          <div class="control-group" id="panel-simulation">
+            <label for="sim-sensor-select">Selected Region for Manual Test:</label>
+            <select id="sim-sensor-select"></select>
+
+            <div class="slider-group" style="margin-top: 10px;">
+              <div class="slider-header">
+                <label for="sim-pressure-slider">Pressure Level:</label>
+                <span class="slider-val mono" id="sim-pressure-value">0%</span>
+              </div>
+              <input type="range" class="range-slider" id="sim-pressure-slider" min="0" max="100" value="0">
+              <!-- Alias for legacy test slider -->
+              <input type="range" id="test-slider" min="0" max="4095" value="0" style="display:none;">
+            </div>
+
+            <div class="preset-section">
+              <label>Gait Phase Presets:</label>
+              <div class="preset-group">
+                <button class="btn btn-sm" id="btn-preset-heel">1. Heel Strike</button>
+                <button class="btn btn-sm" id="btn-preset-mid">2. Midstance</button>
+                <button class="btn btn-sm" id="btn-preset-toe">3. Toe Off</button>
+                <button class="btn btn-sm" id="btn-preset-full">4. Full Foot</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="panel-hardware" style="display: none;"></div>
+
+          <div class="control-group switch-group">
+            <label class="switch-label" for="toggle-invert">
+              <input type="checkbox" id="toggle-invert">
+              <span>Invert ADC (if pressing lowers ADC voltage)</span>
+            </label>
+          </div>
+
+          <div class="calib-stats">
+            <span class="stat-label">Calibrated Range:</span>
+            <span class="stat-value mono" id="calib-range">0 &mdash; 4095</span>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-secondary" id="btn-calibrate">Auto-Calibrate</button>
+            <button class="btn btn-secondary" id="btn-zero">Zero</button>
+            <button class="btn btn-secondary" id="btn-reset-peak">Reset Peak</button>
+          </div>
+        </div>
+
+      </section>
+    </div>
   </main>
+
+  <!-- ===== 4. Settings Modal: NVIDIA NIM API Integration ===== -->
+  <div class="modal-overlay" id="settings-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <h3 id="settings-title">NVIDIA AI Clinical Engine Settings</h3>
+        </div>
+        <button class="btn-close-modal" id="btn-close-settings" aria-label="Close settings">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-desc">
+          Connect your NVIDIA API Key to enable Llama-3.1 clinical inference over the 4-region plantar pressure telemetry and reference dataset comparisons.
+        </p>
+
+        <div class="form-group">
+          <label for="nvidia-api-key-input">NVIDIA API Key (NIM):</label>
+          <div class="input-with-button">
+            <input type="password" id="nvidia-api-key-input" placeholder="nvapi-..." autocomplete="off">
+            <button class="btn btn-sm btn-subtle" id="btn-toggle-key-visibility" type="button">Show</button>
+          </div>
+          <span class="field-hint">
+            Stored securely in your browser's local storage. Never transmitted to third-party servers.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="nvidia-model-select">Clinical Inference Model:</label>
+          <select id="nvidia-model-select">
+            <option value="meta/llama-3.1-70b-instruct" selected>meta/llama-3.1-70b-instruct (Recommended for Biomechanics)</option>
+            <option value="meta/llama-3.3-70b-instruct">meta/llama-3.3-70b-instruct (Latest High-Precision)</option>
+            <option value="mistralai/mixtral-8x22b-instruct">mistralai/mixtral-8x22b-instruct</option>
+            <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct (Fast & Lightweight)</option>
+          </select>
+        </div>
+
+        <div class="settings-status-box" id="settings-status-message">
+          Status: Ready. If no API key is provided, the system uses the deterministic biomechanical rule engine.
+        </div>
+
+        <div class="nvidia-help-box">
+          <p>Need a free key? Visit <a href="https://build.nvidia.com" target="_blank" rel="noopener">build.nvidia.com</a>, create an account, and generate an API key with free starter credits.</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-test-nvidia">Test Connection</button>
+        <button class="btn btn-primary" id="btn-save-settings">Save &amp; Activate</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
