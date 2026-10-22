@@ -3,40 +3,159 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Velostat Pressure Heatmap</title>
+  <title>Velostat Pressure Map</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header>
-    <h1>Velostat Pressure Heatmap</h1>
-    <p class="subtitle">Live ESP32 USB Serial Prototype</p>
+    <div class="header-left">
+      <h1>Velostat Pressure Map</h1>
+      <p class="subtitle">Plantar Pressure Visualization</p>
+    </div>
+    <div class="mode-switcher" role="tablist" aria-label="Data mode">
+      <button class="mode-btn active" id="mode-simulation" role="tab"
+        aria-selected="true" data-mode="simulation">Simulation</button>
+      <button class="mode-btn" id="mode-hardware" role="tab"
+        aria-selected="false" data-mode="hardware">Hardware</button>
+    </div>
   </header>
 
   <main>
-    <!-- ===== Heatmap Visualizer ===== -->
+    <!-- ===== Foot Visualization ===== -->
     <section class="visualization-section">
-      <div class="pad-container">
-        <canvas id="pressure-canvas" width="400" height="400"></canvas>
-        <div class="pad-overlay">
-          <div class="pressure-badge" id="pressure-badge">0%</div>
-          <div class="pressure-desc" id="pressure-desc">IDLE (No Touch)</div>
-        </div>
+      <div class="foot-container" id="foot-container">
+        <canvas id="foot-canvas" tabindex="0" role="img"
+          aria-label="Foot pressure map. Click or use arrow keys to navigate sensors."></canvas>
       </div>
 
       <div class="legend-container">
-        <span class="legend-label">Light (Blue)</span>
-        <canvas id="legend-canvas" width="280" height="18"></canvas>
-        <span class="legend-label">Heavy (Red)</span>
+        <span class="legend-label">No Pressure</span>
+        <canvas id="legend-canvas" width="240" height="14"></canvas>
+        <span class="legend-label">Max Pressure</span>
       </div>
+
+      <p class="viz-note" id="viz-note">
+        Simulation Mode &mdash; Values are simulated, not from hardware sensors
+      </p>
     </section>
 
-    <!-- ===== Controls & Stats ===== -->
-    <section class="panels-section">
+    <!-- ===== Side Panels ===== -->
+    <aside class="sidebar">
 
-      <!-- Serial Connection -->
-      <div class="panel connection-panel">
-        <h2>Serial Connection</h2>
+      <!-- Selected Sensor Info -->
+      <div class="panel" id="sensor-info-panel">
+        <h2>Selected Sensor</h2>
+        <div id="no-selection" class="no-selection">
+          Click a sensor location on the foot
+        </div>
+        <div id="sensor-details" class="sensor-details" hidden>
+          <div class="stat-row">
+            <span class="stat-label">ID</span>
+            <span class="stat-value mono" id="info-id">&mdash;</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Label</span>
+            <span class="stat-value" id="info-label">&mdash;</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Region</span>
+            <span class="stat-value" id="info-region">&mdash;</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Raw Reading</span>
+            <span class="stat-value mono" id="info-raw">&mdash;</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Normalized</span>
+            <span class="stat-value mono" id="info-normalized">&mdash;</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Peak</span>
+            <span class="stat-value mono" id="info-peak">&mdash;</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Data Source</span>
+            <span class="stat-value" id="info-source">&mdash;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Statistics -->
+      <div class="panel">
+        <h2>Pressure Statistics</h2>
+        <div class="stat-row">
+          <span class="stat-label">Active Locations</span>
+          <span class="stat-value mono" id="stat-active">0 / 15</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">HW Channels</span>
+          <span class="stat-value mono" id="stat-hw-channels">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Max Pressure</span>
+          <span class="stat-value mono" id="stat-max-pressure">0.0%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Max Location</span>
+          <span class="stat-value" id="stat-max-location">&mdash;</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Connection</span>
+          <span class="stat-value" id="stat-connection-text">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="stat-connection-label">Disconnected</span>
+          </span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Data Freshness</span>
+          <span class="stat-value" id="stat-freshness">&mdash;</span>
+        </div>
+      </div>
+
+      <!-- Simulation Controls -->
+      <div class="panel" id="panel-simulation">
+        <h2>Simulation Controls</h2>
+
+        <div class="control-group">
+          <label for="sim-sensor-select">Sensor:</label>
+          <select id="sim-sensor-select">
+            <option value="">&mdash; Select a sensor &mdash;</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="sim-pressure-slider">
+            Pressure: <span class="mono" id="sim-pressure-value">0%</span>
+          </label>
+          <input type="range" id="sim-pressure-slider" min="0" max="100" value="0" disabled>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-secondary" id="btn-sim-clear">Clear All</button>
+          <button class="btn btn-secondary" id="btn-reset-peak">Reset Peaks</button>
+        </div>
+
+        <div class="control-group preset-section">
+          <label>Presets:</label>
+          <div class="button-group preset-group">
+            <button class="btn btn-sm" id="btn-preset-heel">Heel Strike</button>
+            <button class="btn btn-sm" id="btn-preset-mid">Midstance</button>
+            <button class="btn btn-sm" id="btn-preset-toe">Toe Off</button>
+            <button class="btn btn-sm" id="btn-preset-full">Full Contact</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hardware Controls -->
+      <div class="panel" id="panel-hardware" hidden>
+        <h2>Hardware Connection</h2>
+
+        <div class="control-group">
+          <label for="hw-channel-sensor">Map GPIO32 reading to:</label>
+          <select id="hw-channel-sensor"></select>
+        </div>
+
         <div class="connection-row">
           <label for="baud-rate">Baud</label>
           <select id="baud-rate">
@@ -47,65 +166,33 @@
           </select>
           <button class="btn btn-primary" id="btn-connect">Connect</button>
         </div>
-        <div class="status-row">
-          <span class="status-dot" id="status-dot"></span>
-          <span class="status-text" id="status-text">Disconnected</span>
-        </div>
+
         <p class="serial-hint" id="serial-hint">
-          Connect ESP32 via USB. Works in Google Chrome or Microsoft Edge.
+          Connect ESP32 via USB. Works in Chrome or Edge only.
         </p>
-      </div>
-
-      <!-- Live Statistics -->
-      <div class="panel stats-panel">
-        <h2>Live Pressure Data</h2>
-        <div class="stat-row">
-          <span class="stat-label">Raw ADC (GPIO32)</span>
-          <span class="stat-value" id="stat-raw">0 / 4095</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Normalized Pressure</span>
-          <span class="stat-value" id="stat-pct">0.0%</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Peak Pressure</span>
-          <span class="stat-value" id="stat-peak">0.0%</span>
-        </div>
-        <div class="stat-row">
-          <span class="stat-label">Refresh Rate</span>
-          <span class="stat-value" id="stat-hz">— Hz</span>
-        </div>
-      </div>
-
-      <!-- Quick Actions / Simulation -->
-      <div class="panel actions-panel">
-        <h2>Calibration & Testing</h2>
 
         <div class="control-group switch-group">
           <label class="switch-label" for="toggle-invert">
             <input type="checkbox" id="toggle-invert">
-            <span>Invert ADC (if pressing lowers ADC)</span>
+            <span>Invert ADC (if pressing lowers the ADC value)</span>
           </label>
-        </div>
-
-        <div class="control-group">
-          <label for="test-slider">Manual Slider (Test without ESP32):</label>
-          <input type="range" id="test-slider" min="0" max="4095" value="0">
         </div>
 
         <div class="calib-stats">
           <span class="stat-label">Calibrated Range:</span>
-          <span class="stat-value" id="calib-range">0 — 4095</span>
+          <span class="stat-value mono" id="calib-range">0 &mdash; 4095</span>
         </div>
+
+        <p class="calib-status" id="pressure-desc"></p>
 
         <div class="button-group">
           <button class="btn btn-secondary" id="btn-calibrate">Auto-Calibrate</button>
-          <button class="btn btn-secondary" id="btn-reset-peak">Reset Peak</button>
           <button class="btn btn-secondary" id="btn-zero">Zero</button>
+          <button class="btn btn-secondary" id="btn-reset-peak-hw">Reset Peaks</button>
         </div>
       </div>
 
-    </section>
+    </aside>
   </main>
 
   <script src="script.js"></script>

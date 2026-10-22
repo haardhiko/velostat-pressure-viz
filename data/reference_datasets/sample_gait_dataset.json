@@ -1,0 +1,142 @@
+{
+  "dataset_id": "REF-GAIT-V1",
+  "name": "Standard Plantar Gait Reference Patterns",
+  "version": "1.0.0",
+  "unit": "normalized",
+  "description": "Baseline normalized plantar pressure distribution templates across canonical stance phases. Values represent typical contact distribution scaled 0.0 to 1.0.",
+  "disclaimer": "Reference templates for technical sensor comparison only. Not calibrated clinical norms.",
+  "records": [
+    {
+      "record_id": "REC-GS-01",
+      "pattern": "Heel Strike (Initial Contact)",
+      "description": "Primary impact concentrated on the calcaneus with minimal forefoot involvement.",
+      "pressures": {
+        "heel_center": 0.90,
+        "heel_medial": 0.70,
+        "heel_lateral": 0.65,
+        "arch_medial": 0.00,
+        "midfoot_center": 0.00,
+        "arch_lateral": 0.05,
+        "meta_1": 0.00,
+        "meta_2": 0.00,
+        "meta_3": 0.00,
+        "meta_5": 0.00,
+        "toe_1": 0.00,
+        "toe_2": 0.00,
+        "toe_3": 0.00,
+        "toe_4": 0.00,
+        "toe_5": 0.00
+      }
+    },
+    {
+      "record_id": "REC-MS-02",
+      "pattern": "Midstance (Full Foot Loading)",
+      "description": "Broad weight distribution across heel, lateral longitudinal arch, and metatarsal heads.",
+      "pressures": {
+        "heel_center": 0.35,
+        "heel_medial": 0.25,
+        "heel_lateral": 0.30,
+        "arch_medial": 0.05,
+        "midfoot_center": 0.30,
+        "arch_lateral": 0.50,
+        "meta_1": 0.65,
+        "meta_2": 0.70,
+        "meta_3": 0.65,
+        "meta_5": 0.60,
+        "toe_1": 0.25,
+        "toe_2": 0.15,
+        "toe_3": 0.10,
+        "toe_4": 0.05,
+        "toe_5": 0.05
+      }
+    },
+    {
+      "record_id": "REC-TO-03",
+      "pattern": "Toe Off (Propulsion)",
+      "description": "Forward weight transfer concentrated on first metatarsal head and hallux; heel unloaded.",
+      "pressures": {
+        "heel_center": 0.00,
+        "heel_medial": 0.00,
+        "heel_lateral": 0.00,
+        "arch_medial": 0.00,
+        "midfoot_center": 0.00,
+        "arch_lateral": 0.00,
+        "meta_1": 0.85,
+        "meta_2": 0.80,
+        "meta_3": 0.50,
+        "meta_5": 0.20,
+        "toe_1": 0.95,
+        "toe_2": 0.65,
+        "toe_3": 0.30,
+        "toe_4": 0.10,
+        "toe_5": 0.05
+      }
+    },
+    {
+      "record_id": "REC-FC-04",
+      "pattern": "Flat Foot Contact (Pes Planus Tendency)",
+      "description": "Elevated contact under the medial arch with reduced arch height contour.",
+      "pressures": {
+        "heel_center": 0.60,
+        "heel_medial": 0.55,
+        "heel_lateral": 0.50,
+        "arch_medial": 0.45,
+        "midfoot_center": 0.50,
+        "arch_lateral": 0.45,
+        "meta_1": 0.70,
+        "meta_2": 0.65,
+        "meta_3": 0.60,
+        "meta_5": 0.55,
+        "toe_1": 0.50,
+        "toe_2": 0.35,
+        "toe_3": 0.30,
+        "toe_4": 0.25,
+        "toe_5": 0.20
+      }
+    },
+    {
+      "record_id": "REC-LB-05",
+      "pattern": "Lateral Border Bias (Supination Tendency)",
+      "description": "Pressure biased towards lateral heel, 5th metatarsal, and lateral border; unloaded medial arch.",
+      "pressures": {
+        "heel_center": 0.40,
+        "heel_medial": 0.15,
+        "heel_lateral": 0.80,
+        "arch_medial": 0.00,
+        "midfoot_center": 0.20,
+        "arch_lateral": 0.65,
+        "meta_1": 0.20,
+        "meta_2": 0.35,
+        "meta_3": 0.55,
+        "meta_5": 0.85,
+        "toe_1": 0.20,
+        "toe_2": 0.25,
+        "toe_3": 0.40,
+        "toe_4": 0.50,
+        "toe_5": 0.45
+      }
+    },
+    {
+      "record_id": "REC-MB-06",
+      "pattern": "Medial Border Bias (Pronation Tendency)",
+      "description": "High focal loading on medial heel, 1st metatarsal head, and hallux.",
+      "pressures": {
+        "heel_center": 0.45,
+        "heel_medial": 0.85,
+        "heel_lateral": 0.20,
+        "arch_medial": 0.35,
+        "midfoot_center": 0.30,
+        "arch_lateral": 0.15,
+        "meta_1": 0.90,
+        "meta_2": 0.60,
+        "meta_3": 0.30,
+        "meta_5": 0.15,
+        "toe_1": 0.85,
+        "toe_2": 0.40,
+        "toe_3": 0.20,
+        "toe_4": 0.10,
+        "toe_5": 0.05
+      }
+    }
+  ]
+}
