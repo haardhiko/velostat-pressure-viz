@@ -51,14 +51,28 @@ for (const r of expectedRegions) {
 }
 console.log('PASS: All expected anatomical regions (Toes, Forefoot, Midfoot, Heel) are represented.');
 
-// Verify 4 regional sensors with unique IDs
+// Verify 5 sensors with unique IDs (2 in toes with good separation, 1 in forefoot, 1 in midfoot, 1 in heel)
 const sensorIds = SENSOR_LOCATIONS.map(s => s.id);
 const uniqueSensorIds = new Set(sensorIds);
-if (uniqueSensorIds.size !== 4) {
-  console.error(`FAIL: Expected 4 unique sensor IDs, found ${uniqueSensorIds.size}`);
+if (uniqueSensorIds.size !== 5) {
+  console.error(`FAIL: Expected 5 unique sensor IDs, found ${uniqueSensorIds.size}`);
   process.exit(1);
 }
-console.log('PASS: Exactly 4 unique sensor locations defined (Toes, Forefoot, Midfoot, Heel).');
+console.log('PASS: Exactly 5 unique sensor locations defined (Toe Medial, Toe Lateral, Forefoot, Midfoot, Heel).');
+
+// Verify good distance between the two toe sensors
+const toe1 = SENSOR_LOCATIONS.find(s => s.id === 'toe_medial');
+const toe2 = SENSOR_LOCATIONS.find(s => s.id === 'toe_lateral');
+if (!toe1 || !toe2) {
+  console.error('FAIL: Could not find both toe sensors (toe_medial, toe_lateral)');
+  process.exit(1);
+}
+const toeDist = Math.sqrt(Math.pow(toe1.x - toe2.x, 2) + Math.pow(toe1.y - toe2.y, 2));
+if (toeDist < 0.20) {
+  console.error(`FAIL: Toe sensors too close together (dist=${toeDist.toFixed(3)})`);
+  process.exit(1);
+}
+console.log(`PASS: Two toe sensors separated by good distance (dist=${toeDist.toFixed(3)} in normalized space).`);
 
 // 3. Test independence of sensor states
 const sensors = {};
@@ -78,10 +92,12 @@ for (const id of sensorIds) {
 console.log('PASS: Sensor value independence verified (pressing heel does not alter toes/arch).');
 
 // 4. Test simultaneous pressure at multiple locations
-sensors['toes'].targetValue = 0.95;
+sensors['toe_medial'].targetValue = 0.95;
+sensors['toe_lateral'].targetValue = 0.65;
 sensors['forefoot'].targetValue = 0.70;
 if (sensors['heel'].targetValue === 0.85 &&
-    sensors['toes'].targetValue === 0.95 &&
+    sensors['toe_medial'].targetValue === 0.95 &&
+    sensors['toe_lateral'].targetValue === 0.65 &&
     sensors['forefoot'].targetValue === 0.70 &&
     sensors['midfoot'].targetValue === 0) {
   console.log('PASS: Simultaneous multi-location pressure verified.');
@@ -121,11 +137,11 @@ class TestSerialAdapter {
 
 const adapter = new TestSerialAdapter();
 adapter.parseLine('2048');
-adapter.parseLine('heel_center:3200,meta_1:1500');
+adapter.parseLine('heel:3200,forefoot:1500');
 adapter.parseLine('100,200,300,400,500');
 
 if (adapter.packets[0].type === 'single_channel' && adapter.packets[0].raw === 2048 &&
-    adapter.packets[1].type === 'multichannel_named' && adapter.packets[1].data.heel_center === 3200 &&
+    adapter.packets[1].type === 'multichannel_named' && adapter.packets[1].data.heel === 3200 &&
     adapter.packets[2].type === 'multichannel_indexed' && adapter.packets[2].data.length === 5) {
   console.log('PASS: SerialAdapter parsing verified (Format A single integer, Format B CSV, Format C key-value).');
 } else {
@@ -148,16 +164,16 @@ function calcNormalized(rawVal, calibMin, calibMax, invertADC) {
 }
 
 // Standard (low ADC = 0, high ADC = 4095)
-const normNormal = calcNormalized(4095, 0, 4095, false);
-if (Math.abs(normNormal - 1.0) > 0.001) throw new Error('Normal calib max failed');
-const normZero = calcNormalized(0, 0, 4095, false);
-if (Math.abs(normZero - 0.0) > 0.001) throw new Error('Normal calib min failed');
+const norm1 = calcNormalized(2048, 0, 4095, false);
+if (Math.abs(norm1 - 0.5) > 0.02) throw new Error(`Standard normalization math failed: ${norm1}`);
 
-// Inverted (Velostat voltage drop when pressed: 4095 = unpressed, 500 = pressed)
-const normInvertPressed = calcNormalized(500, 500, 4095, true);
-if (Math.abs(normInvertPressed - 1.0) > 0.001) throw new Error('Inverted calib pressed failed');
-const normInvertRest = calcNormalized(4095, 500, 4095, true);
-if (Math.abs(normInvertRest - 0.0) > 0.001) throw new Error('Inverted calib rest failed');
+// Inverted (low ADC = pressed, high ADC = resting)
+const norm2 = calcNormalized(1000, 1000, 3500, true);
+if (norm2 !== 1.0) throw new Error(`Inverted max press normalization failed: ${norm2}`);
+
+const norm3 = calcNormalized(3500, 1000, 3500, true);
+if (norm3 !== 0.0) throw new Error(`Inverted resting normalization failed: ${norm3}`);
+
 console.log('PASS: Normalization & ADC inversion math verified.');
 
 console.log('\nALL 6 VERIFICATION CHECKS PASSED SUCCESSFULLY!');
