@@ -3,36 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Velostat Pressure Map</title>
+  <title>Velostat Plantar Pressure Map — Biomechanical Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- ===== 1. Top Utility Bar ===== -->
+  <aside class="utility-bar" aria-label="System telemetry">
+    <div class="utility-left">
+      <span class="utility-badge">RESEARCH SYSTEM</span>
+      <span>VELOSTAT PLANTAR BIOMECHANICS LAB &middot; PL-4 EDITION</span>
+    </div>
+    <div class="utility-right">
+      <span>12-BIT ADC PROTOCOL</span>
+      <span class="utility-divider">&bull;</span>
+      <span>100 HZ STREAM</span>
+      <span class="utility-divider">&bull;</span>
+      <span>WEB SERIAL COMPATIBLE</span>
+    </div>
+  </aside>
+
+  <!-- ===== 2. Primary Navigation / Header ===== -->
   <header>
     <div class="header-left">
-      <h1>Velostat Pressure Map</h1>
-      <p class="subtitle">Plantar Pressure Visualization</p>
+      <div class="brand-badge">
+        <svg class="brand-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>VELOSTAT PRESSURE MAP</h1>
+        <p class="subtitle">Plantar Ground Reaction Force &amp; Regional Distribution</p>
+      </div>
     </div>
-    <div class="mode-switcher" role="tablist" aria-label="Data mode">
+
+    <!-- Mode Switcher (Pill Style) -->
+    <div class="mode-switcher" role="tablist" aria-label="Data mode selector">
       <button class="mode-btn active" id="mode-simulation" role="tab"
-        aria-selected="true" data-mode="simulation">Simulation</button>
+        aria-selected="true" data-mode="simulation">SIMULATION</button>
       <button class="mode-btn" id="mode-hardware" role="tab"
-        aria-selected="false" data-mode="hardware">Hardware</button>
+        aria-selected="false" data-mode="hardware">ESP32 HARDWARE</button>
     </div>
   </header>
 
+  <!-- ===== 3. Main Workspace ===== -->
   <main>
-    <!-- ===== Foot Visualization ===== -->
-    <section class="visualization-section">
+
+    <!-- ===== Left: Foot Visualization Stage ===== -->
+    <section class="visualization-section" aria-label="Plantar Pressure Visualization">
+      <div class="stage-tag-row">
+        <span class="stage-tag">RIGHT FOOT &middot; PLANTAR VIEW</span>
+        <span class="stage-channels-tag">15 NODES &middot; 4 REGIONS</span>
+      </div>
+
       <div class="foot-container" id="foot-container">
         <canvas id="foot-canvas" tabindex="0" role="img"
           aria-label="Foot pressure map. Click or use arrow keys to navigate sensors."></canvas>
       </div>
 
       <div class="legend-container">
-        <span class="legend-label">No Pressure</span>
-        <canvas id="legend-canvas" width="240" height="14"></canvas>
-        <span class="legend-label">Max Pressure</span>
+        <div class="legend-header">
+          <span class="legend-label">0% (REST)</span>
+          <span class="legend-title">RELATIVE LOAD INTENSITY</span>
+          <span class="legend-label">100% (PEAK)</span>
+        </div>
+        <canvas id="legend-canvas" width="280" height="12"></canvas>
       </div>
 
       <p class="viz-note" id="viz-note">
@@ -40,38 +78,38 @@
       </p>
     </section>
 
-    <!-- ===== Side Panels ===== -->
+    <!-- ===== Right: Analytics & Control Panels ===== -->
     <aside class="sidebar">
 
-      <!-- Selected Sensor Info -->
+      <!-- Panel: Selected Sensor Node -->
       <div class="panel" id="sensor-info-panel">
-        <h2>Selected Sensor</h2>
+        <h2>SELECTED SENSOR NODE</h2>
         <div id="no-selection" class="no-selection">
-          Click a sensor location on the foot
+          SELECT A SENSOR NODE ON THE PLANTAR VIEW
         </div>
         <div id="sensor-details" class="sensor-details" hidden>
           <div class="stat-row">
-            <span class="stat-label">ID</span>
+            <span class="stat-label">Sensor ID</span>
             <span class="stat-value mono" id="info-id">&mdash;</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">Label</span>
+            <span class="stat-label">Anatomical Label</span>
             <span class="stat-value" id="info-label">&mdash;</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">Region</span>
+            <span class="stat-label">Product Region</span>
             <span class="stat-value" id="info-region">&mdash;</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">Raw Reading</span>
+            <span class="stat-label">Raw ADC Reading</span>
             <span class="stat-value mono" id="info-raw">&mdash;</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">Normalized</span>
+            <span class="stat-label">Normalized Load</span>
             <span class="stat-value mono" id="info-normalized">&mdash;</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">Peak</span>
+            <span class="stat-label">Peak Recorded</span>
             <span class="stat-value mono" id="info-peak">&mdash;</span>
           </div>
           <div class="stat-row">
@@ -81,27 +119,27 @@
         </div>
       </div>
 
-      <!-- Live Statistics -->
+      <!-- Panel: Live Statistics -->
       <div class="panel">
-        <h2>Pressure Statistics</h2>
+        <h2>BIOMECHANICAL METRICS</h2>
         <div class="stat-row">
           <span class="stat-label">Active Locations</span>
           <span class="stat-value mono" id="stat-active">0 / 15</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">HW Channels</span>
+          <span class="stat-label">Hardware Channels</span>
           <span class="stat-value mono" id="stat-hw-channels">0</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Max Pressure</span>
+          <span class="stat-label">Max Pressure Load</span>
           <span class="stat-value mono" id="stat-max-pressure">0.0%</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Max Location</span>
+          <span class="stat-label">Max Load Location</span>
           <span class="stat-value" id="stat-max-location">&mdash;</span>
         </div>
         <div class="stat-row">
-          <span class="stat-label">Connection</span>
+          <span class="stat-label">Serial Link</span>
           <span class="stat-value" id="stat-connection-text">
             <span class="status-dot" id="status-dot"></span>
             <span id="stat-connection-label">Disconnected</span>
@@ -109,91 +147,129 @@
         </div>
         <div class="stat-row">
           <span class="stat-label">Data Freshness</span>
-          <span class="stat-value" id="stat-freshness">&mdash;</span>
+          <span class="stat-value mono" id="stat-freshness">&mdash;</span>
         </div>
       </div>
 
-      <!-- Simulation Controls -->
+      <!-- Panel: Simulation Controls -->
       <div class="panel" id="panel-simulation">
-        <h2>Simulation Controls</h2>
+        <h2>SIMULATION CONTROLS</h2>
 
         <div class="control-group">
-          <label for="sim-sensor-select">Sensor:</label>
-          <select id="sim-sensor-select">
+          <label for="sim-sensor-select">TARGET SENSOR</label>
+          <select id="sim-sensor-select" class="form-select">
             <option value="">&mdash; Select a sensor &mdash;</option>
           </select>
         </div>
 
         <div class="control-group">
-          <label for="sim-pressure-slider">
-            Pressure: <span class="mono" id="sim-pressure-value">0%</span>
-          </label>
-          <input type="range" id="sim-pressure-slider" min="0" max="100" value="0" disabled>
+          <div class="slider-label-row">
+            <label for="sim-pressure-slider">APPLIED PRESSURE</label>
+            <span class="mono slider-value" id="sim-pressure-value">0%</span>
+          </div>
+          <input type="range" id="sim-pressure-slider" min="0" max="100" value="0" disabled class="range-slider">
         </div>
 
         <div class="button-group">
-          <button class="btn btn-secondary" id="btn-sim-clear">Clear All</button>
-          <button class="btn btn-secondary" id="btn-reset-peak">Reset Peaks</button>
+          <button class="btn btn-secondary" id="btn-sim-clear">CLEAR ALL</button>
+          <button class="btn btn-secondary" id="btn-reset-peak">RESET PEAKS</button>
         </div>
 
         <div class="control-group preset-section">
-          <label>Presets:</label>
+          <label class="control-sublabel">GAIT PRESET TEMPLATES</label>
           <div class="button-group preset-group">
-            <button class="btn btn-sm" id="btn-preset-heel">Heel Strike</button>
-            <button class="btn btn-sm" id="btn-preset-mid">Midstance</button>
-            <button class="btn btn-sm" id="btn-preset-toe">Toe Off</button>
-            <button class="btn btn-sm" id="btn-preset-full">Full Contact</button>
+            <button class="btn btn-sm" id="btn-preset-heel">HEEL STRIKE</button>
+            <button class="btn btn-sm" id="btn-preset-mid">MIDSTANCE</button>
+            <button class="btn btn-sm" id="btn-preset-toe">TOE OFF</button>
+            <button class="btn btn-sm" id="btn-preset-full">FULL CONTACT</button>
           </div>
         </div>
       </div>
 
-      <!-- Hardware Controls -->
+      <!-- Panel: Hardware Connection -->
       <div class="panel" id="panel-hardware" hidden>
-        <h2>Hardware Connection</h2>
+        <h2>ESP32 SERIAL TELEMETRY</h2>
 
         <div class="control-group">
-          <label for="hw-channel-sensor">Map GPIO32 reading to:</label>
-          <select id="hw-channel-sensor"></select>
+          <label for="hw-channel-sensor">MAP GPIO32 READING TO</label>
+          <select id="hw-channel-sensor" class="form-select"></select>
         </div>
 
         <div class="connection-row">
-          <label for="baud-rate">Baud</label>
-          <select id="baud-rate">
-            <option value="9600">9600</option>
-            <option value="57600">57600</option>
-            <option value="115200" selected>115200</option>
-            <option value="230400">230400</option>
-          </select>
-          <button class="btn btn-primary" id="btn-connect">Connect</button>
+          <div class="baud-group">
+            <label for="baud-rate">BAUD RATE</label>
+            <select id="baud-rate" class="form-select">
+              <option value="9600">9600</option>
+              <option value="57600">57600</option>
+              <option value="115200" selected>115200</option>
+              <option value="230400">230400</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btn-connect">CONNECT</button>
         </div>
 
         <p class="serial-hint" id="serial-hint">
-          Connect ESP32 via USB. Works in Chrome or Edge only.
+          Connect ESP32 via USB. Requires Chrome or Edge Web Serial API.
         </p>
 
         <div class="control-group switch-group">
           <label class="switch-label" for="toggle-invert">
             <input type="checkbox" id="toggle-invert">
-            <span>Invert ADC (if pressing lowers the ADC value)</span>
+            <span>Invert ADC (Piezoresistive Voltage Drop Mode)</span>
           </label>
         </div>
 
         <div class="calib-stats">
-          <span class="stat-label">Calibrated Range:</span>
+          <span class="stat-label">CALIBRATED ADC RANGE</span>
           <span class="stat-value mono" id="calib-range">0 &mdash; 4095</span>
         </div>
 
         <p class="calib-status" id="pressure-desc"></p>
 
         <div class="button-group">
-          <button class="btn btn-secondary" id="btn-calibrate">Auto-Calibrate</button>
-          <button class="btn btn-secondary" id="btn-zero">Zero</button>
-          <button class="btn btn-secondary" id="btn-reset-peak-hw">Reset Peaks</button>
+          <button class="btn btn-secondary" id="btn-calibrate">AUTO-CALIBRATE</button>
+          <button class="btn btn-secondary" id="btn-zero">ZERO</button>
+          <button class="btn btn-secondary" id="btn-reset-peak-hw">RESET PEAKS</button>
         </div>
       </div>
 
     </aside>
   </main>
+
+  <!-- ===== 4. Athletic Catalog Footer ===== -->
+  <footer class="app-footer">
+    <div class="footer-columns">
+      <div class="footer-col">
+        <h3>SYSTEM SPECIFICATION</h3>
+        <p>Velostat Piezoresistive Polymer Insole Array</p>
+        <p>15 Anatomical Measurement Points</p>
+        <p>4 Ground Reaction Force Regions</p>
+      </div>
+      <div class="footer-col">
+        <h3>REGIONAL ARCHITECTURE</h3>
+        <p>Posterior Calcaneal Heel</p>
+        <p>Midfoot Longitudinal Arch</p>
+        <p>Forefoot Metatarsal Ball</p>
+        <p>Distal Phalangeal Digits</p>
+      </div>
+      <div class="footer-col">
+        <h3>ACQUISITION PROTOCOL</h3>
+        <p>ESP32 12-bit ADC &middot; GPIO32</p>
+        <p>UART 115200 Baud &middot; Web Serial API</p>
+        <p>Deterministic Baseline Comparison</p>
+      </div>
+      <div class="footer-col">
+        <h3>CLINICAL COMPLIANCE</h3>
+        <p>Research prototype evaluation tool.</p>
+        <p>Dataset template comparison engine.</p>
+        <p>Does not provide clinical medical diagnosis.</p>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <span>&copy; 2026 VELOSTAT PRESSURE LAB &middot; ALL RIGHTS RESERVED</span>
+      <span>TERMS &middot; PRIVACY &middot; BIOMECHANICAL RESEARCH DIVISION</span>
+    </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>
