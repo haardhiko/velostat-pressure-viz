@@ -134,6 +134,110 @@
 
       <!-- Diagnostic Results Output Card (Displayed when analysis completes) -->
       <div class="test-results-container" id="test-results-container" style="display: none;">
+
+        <!-- ============================================================ -->
+        <!-- EXECUTIVE FOOT HEALTH & ACTION REPORT (Simple & Actionable)  -->
+        <!-- ============================================================ -->
+        <div class="executive-summary-report" id="executive-summary-report">
+          <div class="exec-report-header">
+            <div class="exec-title-group">
+              <span class="exec-badge" id="exec-status-badge">ACTION REPORT READY</span>
+              <h3 id="exec-report-title">Foot Health &amp; Improvement Plan</h3>
+              <p class="exec-report-subtitle" id="exec-summary-text">
+                Clear summary of detected foot issues and practical, everyday steps you can take to improve your comfort and walking mechanics.
+              </p>
+            </div>
+            <div class="exec-quick-stats">
+              <div class="exec-stat-pill" id="exec-defects-pill">
+                <span class="exec-stat-num" id="exec-defects-count">0</span>
+                <span class="exec-stat-label">Issues Found</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="exec-panels-grid">
+            <!-- Left: What defects are there -->
+            <div class="exec-card exec-defects-card">
+              <div class="exec-card-header">
+                <div class="exec-icon-circle icon-alert">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </div>
+                <div>
+                  <h4>What Issues Were Detected</h4>
+                  <span class="exec-card-subtitle">Plain-English breakdown of your foot pressure patterns</span>
+                </div>
+              </div>
+              <div class="exec-defects-list" id="exec-defects-list">
+                <!-- Dynamically populated with simple defect items -->
+              </div>
+            </div>
+
+            <!-- Right: What you can do to improve -->
+            <div class="exec-card exec-actions-card">
+              <div class="exec-card-header">
+                <div class="exec-icon-circle icon-check">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <div>
+                  <h4>What You Can Do To Improve</h4>
+                  <span class="exec-card-subtitle">Simple, practical fixes you can start today (No complicated jargon)</span>
+                </div>
+              </div>
+
+              <div class="exec-actions-container">
+                <!-- Footwear & Insoles -->
+                <div class="action-category-group">
+                  <h5 class="action-category-title">
+                    <span class="action-icon">👟</span> Footwear &amp; Insole Recommendations
+                  </h5>
+                  <ul class="action-bullets-list" id="action-footwear-list">
+                    <!-- Populated dynamically -->
+                  </ul>
+                </div>
+
+                <!-- 2-Minute Daily Stretches / Exercises -->
+                <div class="action-category-group">
+                  <h5 class="action-category-title">
+                    <span class="action-icon">🧘</span> Quick Everyday Exercises (Takes 2–3 Mins)
+                  </h5>
+                  <ul class="action-bullets-list" id="action-exercises-list">
+                    <!-- Populated dynamically -->
+                  </ul>
+                </div>
+
+                <!-- Daily Habits & Walking Tips -->
+                <div class="action-category-group">
+                  <h5 class="action-category-title">
+                    <span class="action-icon">💡</span> Daily Habits &amp; Foot Care
+                  </h5>
+                  <ul class="action-bullets-list" id="action-habits-list">
+                    <!-- Populated dynamically -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visual transition banner indicating technical details lie below -->
+          <div class="tech-details-divider-banner">
+            <span class="tech-divider-line"></span>
+            <div class="tech-divider-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <polyline points="19 12 12 19 5 12" />
+              </svg>
+              <span>DETAILED SENSOR DATA, 15-POINT SCREENING &amp; CLINICAL METRICS BELOW</span>
+            </div>
+            <span class="tech-divider-line"></span>
+          </div>
+        </div>
+
         <div class="results-header-banner">
           <div class="verdict-group">
             <span class="verdict-tag" id="results-verdict-badge">CLINICAL EVALUATION COMPLETE</span>

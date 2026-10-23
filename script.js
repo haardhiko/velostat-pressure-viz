@@ -1974,8 +1974,318 @@
     return closest;
   }
 
+  function renderExecutiveActionReport(data) {
+    const { diagnostics, closestMatch } = data;
+    const findings = state.lastScreeningFindings || [];
+
+    const badgeEl = document.getElementById('exec-status-badge');
+    const titleEl = document.getElementById('exec-report-title');
+    const summaryEl = document.getElementById('exec-summary-text');
+    const countEl = document.getElementById('exec-defects-count');
+    const defectsListEl = document.getElementById('exec-defects-list');
+    const footwearListEl = document.getElementById('action-footwear-list');
+    const exercisesListEl = document.getElementById('action-exercises-list');
+    const habitsListEl = document.getElementById('action-habits-list');
+
+    if (!badgeEl || !defectsListEl || !footwearListEl) return;
+
+    // Case 1: Unloaded Insole (0% load)
+    if (diagnostics.isUnloaded) {
+      badgeEl.className = 'exec-badge';
+      badgeEl.textContent = 'INSOLE UNWEIGHTED';
+      titleEl.textContent = 'No Foot Pressure Registered';
+      summaryEl.textContent = 'The insole sensors are currently at resting baseline (0% load). Step onto the insole or click a preset to see your customized report.';
+      countEl.textContent = '0';
+
+      defectsListEl.innerHTML = `
+        <div class="exec-defect-item severity-normal">
+          <div class="defect-item-title-row">
+            <span class="defect-item-name">ℹ️ No Foot Contact Detected</span>
+            <span class="defect-item-tag tag-normal">Standby</span>
+          </div>
+          <div class="defect-item-desc">
+            All 5 regional sensor locations are registering 0% pressure. No stance or walking steps were detected during this recording.
+          </div>
+          <div class="defect-item-what-it-means">
+            What this means: The insole is either not stepped on yet, or needs to be calibrated.
+          </div>
+        </div>
+      `;
+
+      footwearListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Place Insole Flat:</strong> Ensure the sensor insole sits flat inside your walking or running shoes without folds.</li>
+        <li class="action-bullet-item"><strong>Check Sensor Alignment:</strong> Ensure the 5 points sit under your heel, medial arch, lateral arch, and 1st/5th metatarsal heads.</li>
+      `;
+
+      exercisesListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Step &amp; Test:</strong> Step on the insole and take a natural step, or click <strong>Instant Screen (Current Pressure)</strong> above.</li>
+        <li class="action-bullet-item"><strong>Try Presets:</strong> Click <strong>Flat Foot</strong> or <strong>High Arch</strong> above to see sample diagnostic action plans.</li>
+      `;
+
+      habitsListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Connection Check:</strong> If using hardware, verify the USB cable is connected and baud rate is 115200.</li>
+      `;
+      return;
+    }
+
+    // Case 2: Saturated Insole
+    if (closestMatch && closestMatch.record_id === 'REC-SATURATION-99') {
+      badgeEl.className = 'exec-badge badge-warning';
+      badgeEl.textContent = 'SENSOR SATURATION';
+      titleEl.textContent = 'Maximum Sensor Load Clamped';
+      summaryEl.textContent = 'All sensor zones are simultaneously pushed to 100% capacity. This indicates static clamping rather than a normal dynamic walking step.';
+      countEl.textContent = '1';
+
+      defectsListEl.innerHTML = `
+        <div class="exec-defect-item severity-severe">
+          <div class="defect-item-title-row">
+            <span class="defect-item-name">⚠️ Full Sensor Saturation</span>
+            <span class="defect-item-tag tag-alert">Clamped</span>
+          </div>
+          <div class="defect-item-desc">
+            All 5 sensors registered maximum load at the same moment without normal heel-to-toe progression.
+          </div>
+          <div class="defect-item-what-it-means">
+            What this means: Check that the insole is not mechanically pinched inside tight footwear or over-tared.
+          </div>
+        </div>
+      `;
+
+      footwearListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Loosen Footwear:</strong> Ensure shoes are not laced too tightly around the foot bed.</li>
+      `;
+      exercisesListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Re-Zero Tare:</strong> Lift your foot completely off the sensor and click <strong>Set Baseline (Tare)</strong>.</li>
+      `;
+      habitsListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Dynamic Step:</strong> Walk at a natural, comfortable pace rather than standing stiffly in place.</li>
+      `;
+      return;
+    }
+
+    // Filter detected findings from the 15 screening checks
+    const detected = findings.filter(f => f.status === 'Detected');
+    countEl.textContent = detected.length;
+
+    // Case 3: Completely Healthy / Normal (0 defects)
+    if (detected.length === 0) {
+      badgeEl.className = 'exec-badge badge-healthy';
+      badgeEl.textContent = 'HEALTHY BALANCED GAIT';
+      titleEl.textContent = 'Your Foot Mechanics Look Great!';
+      summaryEl.textContent = 'Your body weight is distributed smoothly across your heel, arch, and the ball of your foot with natural shock absorption and balanced alignment.';
+
+      defectsListEl.innerHTML = `
+        <div class="exec-defect-item severity-normal">
+          <div class="defect-item-title-row">
+            <span class="defect-item-name">✅ No Foot Defects Detected</span>
+            <span class="defect-item-tag tag-normal">Optimal</span>
+          </div>
+          <div class="defect-item-desc">
+            Pressure flows naturally: initial contact is absorbed by the heel, distributed across the lateral arch, and propelled smoothly across the metatarsal ball.
+          </div>
+          <div class="defect-item-what-it-means">
+            What this means: Your arch has healthy spring, your joints are well-aligned, and no pressure hotspots were found.
+          </div>
+        </div>
+      `;
+
+      footwearListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Keep Current Shoes:</strong> Your footwear provides good support. Stick with neutral, well-cushioned sneakers.</li>
+        <li class="action-bullet-item"><strong>Mileage Check:</strong> Replace athletic shoes every 350–500 miles (or every 6–9 months of regular walking) as midsole foam compresses.</li>
+      `;
+
+      exercisesListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Calf &amp; Ankle Mobility:</strong> Do 30 seconds of wall calf stretches after walks to keep tendons flexible.</li>
+        <li class="action-bullet-item"><strong>Single-Leg Balance:</strong> Stand on one foot for 30 seconds while brushing teeth to maintain ankle joint stability.</li>
+      `;
+
+      habitsListEl.innerHTML = `
+        <li class="action-bullet-item"><strong>Active Breaks:</strong> Stand up and take a 2-minute stroll every 45–60 minutes of seated desk work.</li>
+        <li class="action-bullet-item"><strong>Keep Feet Moisturized:</strong> Apply foot cream after showers to prevent heel fissures and dry skin.</li>
+      `;
+      return;
+    }
+
+    // Case 4: 1 or more defects detected!
+    const isSevere = detected.some(d => d.severity === 'Severe');
+    badgeEl.className = isSevere ? 'exec-badge badge-alert' : 'exec-badge badge-warning';
+    badgeEl.textContent = `${detected.length} FOOT ISSUE${detected.length > 1 ? 'S' : ''} DETECTED`;
+    titleEl.textContent = 'Foot Health & Action Plan';
+    summaryEl.textContent = 'We detected specific pressure imbalances in your stance. Below is a plain-English explanation of each issue and practical, easy fixes you can do right away.';
+
+    // Generate plain-English defect cards
+    let defectsHtml = '';
+    const plainDefectExplanations = {
+      'PES-PLANUS': {
+        title: 'Flat Foot / Fallen Arch (Over-Pronation)',
+        whatIsIt: 'Your inner arch is collapsing toward the ground when you step instead of staying raised like a natural spring.',
+        whatItMeans: 'Why it matters: When your arch flattens, your ankles and knees twist inward, which can cause aching shins, arch fatigue, and knee joint stress.'
+      },
+      'PES-CAVUS': {
+        title: 'High Rigid Arch (Pes Cavus)',
+        whatIsIt: 'Your middle arch stays raised high and barely touches the ground at all during midstance.',
+        whatItMeans: 'Why it matters: Almost all your body weight slams directly onto your heel and the front ball, leaving your feet with poor natural shock absorption.'
+      },
+      'METATARSALGIA': {
+        title: 'Ball-of-Foot Overload (Metatarsalgia Risk)',
+        whatIsIt: 'Excessive pressure is concentrating under the front ball of your foot with every step.',
+        whatItMeans: 'Why it matters: Over time this leads to burning pain, soreness under the metatarsal bones, calluses, or the feeling of stepping on a marble.'
+      },
+      'UNEVEN-FOREFOOT': {
+        title: 'Uneven Push-Off (Ball of Foot Tilt)',
+        whatIsIt: 'You are pushing off with much more weight on one side of the ball of your foot (e.g. big toe vs pinky toe).',
+        whatItMeans: 'Why it matters: Can cause bunion irritation, big toe joint stiffness, or extra strain along the outer foot border.'
+      },
+      'PLANTAR-FASCIITIS': {
+        title: 'Plantar Fascia Strain (Heel & Arch Stress)',
+        whatIsIt: 'Heavy heel impact combined with arch stretching is putting excessive tension on the ligament under your foot.',
+        whatItMeans: 'Why it matters: This is the primary driver of sharp morning heel pain, arch tightness, and heel bone spurs.'
+      },
+      'ABNORMAL-HEEL': {
+        title: 'Hard Heel Strike / Shock Transmission',
+        whatIsIt: 'Your heel is hitting the ground harder than normal without enough muscular cushion.',
+        whatItMeans: 'Why it matters: High-impact heel strikes send shock waves traveling directly up your shin into your knee joint.'
+      },
+      'EXCESSIVE-PRESSURE': {
+        title: 'High Pressure Hotspot (>85% Peak Load)',
+        whatIsIt: 'A single zone under your foot is bearing intense, focused weight.',
+        whatItMeans: 'Why it matters: Concentrated pressure points lead to thick calluses, corns, skin breakdown, and aching soreness.'
+      },
+      'DIABETIC-RISK': {
+        title: 'Prolonged Focal Pressure Warning',
+        whatIsIt: 'High pressure is remaining on one spot without regular relief during your steps.',
+        whatItMeans: 'Why it matters: Prolonged pressure restricts micro-circulation in the skin, which requires attention to avoid tissue breakdown.'
+      },
+      'ML-IMBALANCE': {
+        title: 'Foot Tilting Inward or Outward (Side-to-Side Roll)',
+        whatIsIt: 'Your foot is tilting heavily toward the inside edge (pronation) or the outside edge (supination) rather than staying level.',
+        whatItMeans: 'Why it matters: Uneven roll places twisting torque on your ankle ligaments and uneven wear on your knee cartilage.'
+      },
+      'FH-IMBALANCE': {
+        title: 'Front-Heavy or Back-Heavy Weight Shift',
+        whatIsIt: 'You are leaning a disproportionate amount of your body weight forward onto your toes or back onto your heels.',
+        whatItMeans: 'Why it matters: Tight calf muscles often pull weight forward, causing forefoot burning and anterior knee shear.'
+      },
+      'MIDFOOT-ARCH': {
+        title: 'Midfoot / Cuboid Loading Anomaly',
+        whatIsIt: 'Your midfoot arch is contacting the ground irregularly on either the inner sag or outer cuboid edge.',
+        whatItMeans: 'Why it matters: Can lead to midfoot fatigue, stiffness after walking, or outer foot edge soreness.'
+      },
+      'ASYMMETRIC-LOAD': {
+        title: 'Uneven Stance Timing / Dragging Stride',
+        whatIsIt: 'Your foot is spending too much or too little time bearing weight compared to a normal 60/40 step rhythm.',
+        whatItMeans: 'Why it matters: Often indicates subconscious limping or guarding a sensitive limb.'
+      },
+      'WALKING-KINETICS': {
+        title: 'Disrupted Heel-to-Toe Roll Sequence',
+        whatIsIt: 'Your foot is not transitioning smoothly from heel strike to midfoot to push-off.',
+        whatItMeans: 'Why it matters: Can cause shuffling, tripping hazards, or premature foot slap.'
+      },
+      'COMPENSATORY-OFFLOAD': {
+        title: 'Protective Offloading / Sparing a Sensitive Area',
+        whatIsIt: 'You are shifting your weight away from a low-pressure void onto the opposite edge of the foot.',
+        whatItMeans: 'Why it matters: The body naturally redirects weight away from pain, but overloads the neighboring area.'
+      },
+      'PERSISTENT-PRESSURE': {
+        title: 'Constant Pressure Without Relief Phase',
+        whatIsIt: 'A sensor zone never fully unloads during the swing phase of your walk.',
+        whatItMeans: 'Why it matters: Healthy feet need complete cyclical pressure release during every step.'
+      }
+    };
+
+    detected.forEach(d => {
+      const exp = plainDefectExplanations[d.code] || {
+        title: d.name,
+        whatIsIt: d.abnormalityDetected,
+        whatItMeans: d.possibleClinicalAssociation
+      };
+      const isSev = d.severity === 'Severe';
+      defectsHtml += `
+        <div class="exec-defect-item ${isSev ? 'severity-severe' : ''}">
+          <div class="defect-item-title-row">
+            <span class="defect-item-name">⚠️ ${exp.title}</span>
+            <span class="defect-item-tag ${isSev ? 'tag-alert' : 'tag-warning'}">${d.severity}</span>
+          </div>
+          <div class="defect-item-desc">${exp.whatIsIt}</div>
+          <div class="defect-item-what-it-means">${exp.whatItMeans}</div>
+        </div>
+      `;
+    });
+    defectsListEl.innerHTML = defectsHtml;
+
+    // Generate Tailored Action Plan
+    const codes = new Set(detected.map(d => d.code));
+    let footwearBullets = [];
+    let exerciseBullets = [];
+    let habitBullets = [];
+
+    // Footwear / Insole tailored recommendations
+    if (codes.has('PES-PLANUS') || codes.has('ML-IMBALANCE')) {
+      footwearBullets.push('<strong>Arch-Support Insoles:</strong> Choose semirigid orthotic insoles with firm medial longitudinal arch support to prevent your arch from collapsing inward.');
+      footwearBullets.push('<strong>Stability / Motion-Control Shoes:</strong> Look for sneakers with medial posting (firmer grey foam on the inner edge) to prevent inward ankle roll.');
+    }
+    if (codes.has('PES-CAVUS') || codes.has('ABNORMAL-HEEL')) {
+      footwearBullets.push('<strong>Cushioned Shock-Absorbing Insoles:</strong> Use deeply cushioned insoles with viscoelastic gel heel pads to absorb impact shock before it reaches your knees.');
+      footwearBullets.push('<strong>Thick Midsole Sneakers:</strong> Choose running or walking shoes with plush EVA or air cushioning; avoid minimalist thin-soled shoes.');
+    }
+    if (codes.has('METATARSALGIA') || codes.has('UNEVEN-FOREFOOT') || codes.has('FH-IMBALANCE')) {
+      footwearBullets.push('<strong>Metatarsal Pads / Domes:</strong> Place a small teardrop-shaped metatarsal pad in your shoes just behind the ball of the foot to lift the metatarsal heads off the ground.');
+      footwearBullets.push('<strong>Wide Toe Box &amp; Low Drop:</strong> Choose shoes with a spacious front toe box so your toes aren\'t squeezed, and keep heel height under 1 inch.');
+    }
+    if (codes.has('PLANTAR-FASCIITIS')) {
+      footwearBullets.push('<strong>Slight Heel Lift (10mm Drop):</strong> Avoid totally flat zero-drop shoes or flat flip-flops; a 10mm heel drop takes direct tension off the plantar fascia.');
+      footwearBullets.push('<strong>Deep Heel Cup:</strong> Wear shoes with a structured heel counter to keep your natural heel fat pad centralized under the bone.');
+    }
+    if (footwearBullets.length === 0) {
+      footwearBullets.push('<strong>Supportive Walking Footwear:</strong> Wear structured sneakers with good arch support and avoid worn-down soles.');
+      footwearBullets.push('<strong>Replace Old Shoes:</strong> Cushioning breaks down after 6–9 months of regular wear.');
+    }
+
+    // 2-Minute Daily Stretches / Exercises
+    if (codes.has('PES-PLANUS') || codes.has('ML-IMBALANCE')) {
+      exerciseBullets.push('<strong>Towel Scrunches (1 min):</strong> Sit on a chair, place a small towel flat on the floor, and use your toes to scrunch it toward you (2 sets of 10 scrunches).');
+      exerciseBullets.push('<strong>Standing Heel Raises (1 min):</strong> Stand near a wall, raise slowly onto your tiptoes for 2 seconds, and slowly lower down (15 repetitions to strengthen posterior tibialis).');
+    }
+    if (codes.has('PES-CAVUS') || codes.has('PLANTAR-FASCIITIS')) {
+      exerciseBullets.push('<strong>Tennis Ball Foot Roll (2 mins):</strong> Sit comfortably, place a tennis ball or frozen water bottle under your arch, and roll gently back and forth to release tight fascia.');
+      exerciseBullets.push('<strong>Seated Big Toe Stretch (1 min):</strong> Cross your foot over your opposite knee and gently pull your toes toward your shin, holding for 30 seconds on each foot.');
+    }
+    if (codes.has('METATARSALGIA') || codes.has('FH-IMBALANCE') || codes.has('ABNORMAL-HEEL')) {
+      exerciseBullets.push('<strong>Wall Calf Stretch (1 min):</strong> Place hands on a wall, step one leg back with your heel flat on the floor, and lean forward for 30 seconds per leg (tight calves force excess weight forward).');
+      exerciseBullets.push('<strong>Toe Splaying &amp; Spreading (1 min):</strong> Sit down and actively spread all five toes as wide apart as possible, hold for 5 seconds, repeat 8 times.');
+    }
+    if (exerciseBullets.length === 0) {
+      exerciseBullets.push('<strong>Gentle Ankle Circles (1 min):</strong> Rotate your ankle clockwise and counter-clockwise 15 times to keep joints flexible.');
+      exerciseBullets.push('<strong>Wall Calf Stretch (1 min):</strong> Stretch both calves against a wall for 30 seconds each.');
+    }
+
+    // Daily Habits
+    if (codes.has('PES-PLANUS') || codes.has('PLANTAR-FASCIITIS')) {
+      habitBullets.push('<strong>No Barefoot on Hard Floors:</strong> Avoid walking barefoot on hard tiles or hardwood; wear supportive house slides or cushioned slippers indoors.');
+      habitBullets.push('<strong>Morning Stretch Before Standing:</strong> Before your feet hit the floor in the morning, gently flex and stretch your toes to prevent sudden fascial pull.');
+    }
+    if (codes.has('EXCESSIVE-PRESSURE') || codes.has('DIABETIC-RISK')) {
+      habitBullets.push('<strong>Inspect Your Feet Daily:</strong> Check the bottoms of your feet daily for red pressure marks, hot spots, or early callus buildup.');
+      habitBullets.push('<strong>Moisturize &amp; Wear Padded Socks:</strong> Use thick, moisture-wicking athletic socks (or seamless socks) and apply moisturizer to prevent skin cracking.');
+    }
+    if (codes.has('ABNORMAL-HEEL') || codes.has('FH-IMBALANCE')) {
+      habitBullets.push('<strong>Shorten Stride Slightly:</strong> Try taking slightly shorter, quicker steps when walking on concrete to prevent hard heel slamming.');
+    }
+    if (habitBullets.length === 0) {
+      habitBullets.push('<strong>Stay Active with Walking Breaks:</strong> Take brief 2-minute walking breaks during prolonged desk work.');
+      habitBullets.push('<strong>Listen to Your Feet:</strong> If feet feel sore or fatigued after walks, rest and elevate them for 10 minutes.');
+    }
+
+    footwearListEl.innerHTML = footwearBullets.slice(0, 3).map(b => `<li class="action-bullet-item">${b}</li>`).join('');
+    exercisesListEl.innerHTML = exerciseBullets.slice(0, 3).map(b => `<li class="action-bullet-item">${b}</li>`).join('');
+    habitsListEl.innerHTML = habitBullets.slice(0, 3).map(b => `<li class="action-bullet-item">${b}</li>`).join('');
+  }
+
   function renderDiagnosticResults(data) {
     const { heelPct, midfootPct, forefootPct, toesPct, diagnostics, closestMatch, clinicalNarrative } = data;
+
+    // Render User-Friendly Executive Action Report at the top
+    renderExecutiveActionReport(data);
 
     const healthEl = document.getElementById('results-health-index');
     const badge = document.getElementById('results-verdict-badge');
