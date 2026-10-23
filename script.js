@@ -13,8 +13,8 @@
 
   /**
    * 5 Anatomical sensor locations:
-   * 1. Toes: Unified digital crest & hallux pad
-   * 2. Forefoot: Metatarsal ball
+   * 1. Medial Forefoot: 1st Metatarsal head / ball
+   * 2. Lateral Forefoot: 5th Metatarsal head / ball
    * 3. Medial Arch: Plantar instep (inner arch)
    * 4. Lateral Arch: Outer midfoot (lateral longitudinal arch)
    * 5. Heel: Calcaneus rearfoot cup
@@ -24,13 +24,11 @@
    * y=0 is distal (toes), y=1 is proximal (heel)
    */
   const SENSOR_LOCATIONS = [
-    // --- Toes: 1 Sensor covering Unified Digital Crest & Hallux Pad ---
-    { id: 'toes', label: 'Toes (Digital Crest)', region: 'Toes', x: 0.44, y: 0.12, radius: 0.11 },
+    // --- Forefoot: 2 Sensors (Medial Ball & Lateral Ball with wide separation across the ball of the foot) ---
+    { id: 'forefoot_medial', label: 'Medial Forefoot (1st Metatarsal Ball)', region: 'Forefoot', x: 0.35, y: 0.34, radius: 0.11 },
+    { id: 'forefoot_lateral', label: 'Lateral Forefoot (5th Metatarsal Ball)', region: 'Forefoot', x: 0.65, y: 0.34, radius: 0.11 },
 
-    // --- Forefoot: Metatarsal Ball ---
-    { id: 'forefoot', label: 'Forefoot (Ball)', region: 'Forefoot', x: 0.50, y: 0.35, radius: 0.13 },
-
-    // --- Midfoot: 2 Arch Sensors (Medial Arch & Lateral Arch with wide separation) ---
+    // --- Midfoot: 2 Arch Sensors (Medial Arch & Lateral Arch with wide separation across the midfoot) ---
     { id: 'arch_medial', label: 'Medial Arch (Instep)', region: 'Midfoot', x: 0.36, y: 0.58, radius: 0.11 },
     { id: 'arch_lateral', label: 'Lateral Arch (Outer Midfoot)', region: 'Midfoot', x: 0.68, y: 0.58, radius: 0.11 },
 
@@ -134,9 +132,31 @@
    * ========================================================================== */
 
   const HARDWARE_MAPPING_PRESETS = {
+    'forefoot_to_heel': {
+      1: 'forefoot_medial',
+      2: 'forefoot_lateral',
+      3: 'arch_medial',
+      4: 'arch_lateral',
+      5: 'heel'
+    },
+    'heel_to_forefoot': {
+      1: 'heel',
+      2: 'arch_lateral',
+      3: 'arch_medial',
+      4: 'forefoot_lateral',
+      5: 'forefoot_medial'
+    },
+    'forefoot_arch_swap': {
+      1: 'forefoot_lateral',
+      2: 'forefoot_medial',
+      3: 'arch_lateral',
+      4: 'arch_medial',
+      5: 'heel'
+    },
+    // Retain legacy preset keys so any localStorage cached key won't crash
     'toe_to_heel': {
-      1: 'toes',
-      2: 'forefoot',
+      1: 'forefoot_medial',
+      2: 'forefoot_lateral',
       3: 'arch_medial',
       4: 'arch_lateral',
       5: 'heel'
@@ -145,14 +165,14 @@
       1: 'heel',
       2: 'arch_lateral',
       3: 'arch_medial',
-      4: 'forefoot',
-      5: 'toes'
+      4: 'forefoot_lateral',
+      5: 'forefoot_medial'
     },
     'toes_arch_forefoot_heel': {
-      1: 'toes',
+      1: 'forefoot_medial',
       2: 'arch_medial',
       3: 'arch_lateral',
-      4: 'forefoot',
+      4: 'forefoot_lateral',
       5: 'heel'
     }
   };
@@ -170,8 +190,8 @@
 
     // Hardware connection state & 5-Point GPIO Pin Mapping
     hwMappedSensorId: 'heel', // Physical single-channel fallback
-    hardwareMappingPreset: 'toe_to_heel',
-    hardwareMapping: { ...HARDWARE_MAPPING_PRESETS['toe_to_heel'] },
+    hardwareMappingPreset: 'forefoot_to_heel',
+    hardwareMapping: { ...HARDWARE_MAPPING_PRESETS['forefoot_to_heel'] },
     hwConnected: false,
     rawADC: 0,
     lastSerialTimestamp: 0,
@@ -251,56 +271,65 @@
     }
 
     const aliases = {
-      'point 1': state.hardwareMapping ? state.hardwareMapping[1] : 'toes',
-      'point 2': state.hardwareMapping ? state.hardwareMapping[2] : 'forefoot',
+      'point 1': state.hardwareMapping ? state.hardwareMapping[1] : 'forefoot_medial',
+      'point 2': state.hardwareMapping ? state.hardwareMapping[2] : 'forefoot_lateral',
       'point 3': state.hardwareMapping ? state.hardwareMapping[3] : 'arch_medial',
       'point 4': state.hardwareMapping ? state.hardwareMapping[4] : 'arch_lateral',
       'point 5': state.hardwareMapping ? state.hardwareMapping[5] : 'heel',
-      'point_1': 'toes',
-      'point_2': 'forefoot',
+      'point_1': 'forefoot_medial',
+      'point_2': 'forefoot_lateral',
       'point_3': 'arch_medial',
       'point_4': 'arch_lateral',
       'point_5': 'heel',
-      'p1': 'toes',
-      'p2': 'forefoot',
+      'p1': 'forefoot_medial',
+      'p2': 'forefoot_lateral',
       'p3': 'arch_medial',
       'p4': 'arch_lateral',
       'p5': 'heel',
-      'gpio 32': 'toes',
-      'gpio 33': 'forefoot',
+      'gpio 32': 'forefoot_medial',
+      'gpio 33': 'forefoot_lateral',
       'gpio 34': 'arch_medial',
       'gpio 35': 'arch_lateral',
       'gpio 36': 'heel',
-      'gpio32': 'toes',
-      'gpio33': 'forefoot',
+      'gpio32': 'forefoot_medial',
+      'gpio33': 'forefoot_lateral',
       'gpio34': 'arch_medial',
       'gpio35': 'arch_lateral',
       'gpio36': 'heel',
-      '32': 'toes',
-      '33': 'forefoot',
+      '32': 'forefoot_medial',
+      '33': 'forefoot_lateral',
       '34': 'arch_medial',
       '35': 'arch_lateral',
       '36': 'heel',
-      'toes': 'toes',
-      'toe': 'toes',
-      'toe_1': 'toes',
-      'hallux': 'toes',
-      'toe_medial': 'toes',
-      'toes_medial': 'toes',
-      'toe_lateral': 'arch_lateral',
-      'toes_lateral': 'arch_lateral',
-      'toe_2': 'arch_lateral',
-      'toe_3': 'arch_lateral',
-      'toe_4': 'arch_lateral',
-      'toe_5': 'arch_lateral',
-      'forefoot': 'forefoot',
-      'ball': 'forefoot',
-      'meta_1': 'forefoot',
-      'meta_2': 'forefoot',
-      'meta_3': 'forefoot',
-      'meta_5': 'forefoot',
+      'forefoot_medial': 'forefoot_medial',
+      'forefoot_lateral': 'forefoot_lateral',
+      'fm': 'forefoot_medial',
+      'fl': 'forefoot_lateral',
+      'forefoot': 'forefoot_medial',
+      'forefoot_center': 'forefoot_medial',
+      'ball': 'forefoot_medial',
+      'ball_medial': 'forefoot_medial',
+      'ball_lateral': 'forefoot_lateral',
+      'meta_1': 'forefoot_medial',
+      'meta_2': 'forefoot_medial',
+      'meta_3': 'forefoot_lateral',
+      'meta_5': 'forefoot_lateral',
+      'toes': 'forefoot_medial',
+      'toe': 'forefoot_medial',
+      'toe_1': 'forefoot_medial',
+      'hallux': 'forefoot_medial',
+      'toe_medial': 'forefoot_medial',
+      'toes_medial': 'forefoot_medial',
+      'toe_lateral': 'forefoot_lateral',
+      'toes_lateral': 'forefoot_lateral',
+      'toe_2': 'forefoot_lateral',
+      'toe_3': 'forefoot_lateral',
+      'toe_4': 'forefoot_lateral',
+      'toe_5': 'forefoot_lateral',
       'arch_medial': 'arch_medial',
       'arch_lateral': 'arch_lateral',
+      'am': 'arch_medial',
+      'al': 'arch_lateral',
       'medial_arch': 'arch_medial',
       'lateral_arch': 'arch_lateral',
       'midfoot': 'arch_medial',
@@ -310,6 +339,7 @@
       'midfoot_lateral': 'arch_lateral',
       'midfoot_center': 'arch_medial',
       'heel': 'heel',
+      'h': 'heel',
       'heel_center': 'heel',
       'heel_medial': 'heel',
       'heel_lateral': 'heel'
@@ -541,8 +571,8 @@
       ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
 
       ctx.fillText('TOES (ALL 5 TOES)', w * 0.50, h * 0.08);
-      ctx.fillText('FOREFOOT (BALL)', w * 0.50, h * 0.44);
-      ctx.fillText('MIDFOOT (ARCH)', w * 0.54, h * 0.66);
+      ctx.fillText('FOREFOOT (2 BALL SENSORS)', w * 0.50, h * 0.44);
+      ctx.fillText('MIDFOOT (2 ARCH SENSORS)', w * 0.54, h * 0.66);
       ctx.fillText('HEEL (CALCANEUS)', w * 0.53, h * 0.89);
 
       ctx.restore();
@@ -650,14 +680,16 @@
       ctx.save();
 
       const nodeLetters = {
-        'toes': 'T',
-        'forefoot': 'F',
+        'forefoot_medial': 'FM',
+        'forefoot_lateral': 'FL',
         'arch_medial': 'AM',
         'arch_lateral': 'AL',
         'heel': 'H',
         // Fallback for aliases
-        'toe_medial': 'T',
-        'toe_lateral': 'AL',
+        'forefoot': 'FM',
+        'toes': 'FM',
+        'toe_medial': 'FM',
+        'toe_lateral': 'FL',
         'midfoot': 'AM'
       };
 
@@ -989,8 +1021,8 @@
       }
 
       // Record 5-sensor snapshot
-      const valToes = state.sensors['toes'] ? state.sensors['toes'].currentValue : (state.sensors['toe_medial'] ? state.sensors['toe_medial'].currentValue : 0);
-      const valForefoot = state.sensors['forefoot'] ? state.sensors['forefoot'].currentValue : 0;
+      const valForefootMedial = state.sensors['forefoot_medial'] ? state.sensors['forefoot_medial'].currentValue : (state.sensors['forefoot'] ? state.sensors['forefoot'].currentValue : 0);
+      const valForefootLateral = state.sensors['forefoot_lateral'] ? state.sensors['forefoot_lateral'].currentValue : 0;
       const valArchMedial = state.sensors['arch_medial'] ? state.sensors['arch_medial'].currentValue : (state.sensors['midfoot'] ? state.sensors['midfoot'].currentValue : 0);
       const valArchLateral = state.sensors['arch_lateral'] ? state.sensors['arch_lateral'].currentValue : 0;
       const valHeel = state.sensors['heel'] ? state.sensors['heel'].currentValue : 0;
@@ -999,12 +1031,14 @@
         t: performance.now(),
         heel: valHeel,
         midfoot: Math.max(valArchMedial, valArchLateral),
-        forefoot: valForefoot,
-        toes: valToes,
+        forefoot: Math.max(valForefootMedial, valForefootLateral),
+        toes: 0.0,
+        forefoot_medial: valForefootMedial,
+        forefoot_lateral: valForefootLateral,
         arch_medial: valArchMedial,
         arch_lateral: valArchLateral,
-        toe_medial: valToes,
-        toe_lateral: valArchLateral
+        toe_medial: 0.0,
+        toe_lateral: 0.0
       };
       state.test.samples.push(sample);
 
@@ -1036,8 +1070,8 @@
         if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.85 * w;
         if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.04 * w;
         if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.08 * w;
-        if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.05 * w;
-        if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.02 * w;
+        if (state.sensors['forefoot_medial']) state.sensors['forefoot_medial'].targetValue = 0.04 * w;
+        if (state.sensors['forefoot_lateral']) state.sensors['forefoot_lateral'].targetValue = 0.05 * w;
       }
       // 2. Loading Response / Midstance
       else if (normStance < 0.60) {
@@ -1045,25 +1079,25 @@
         if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.40 * (1 - sub * 0.7);
         if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.18 * Math.sin(sub * Math.PI);
         if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.35 * Math.sin(sub * Math.PI);
-        if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.70 * Math.sin(sub * Math.PI);
-        if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.22 * sub;
+        if (state.sensors['forefoot_medial']) state.sensors['forefoot_medial'].targetValue = 0.60 * Math.sin(sub * Math.PI);
+        if (state.sensors['forefoot_lateral']) state.sensors['forefoot_lateral'].targetValue = 0.70 * Math.sin(sub * Math.PI);
       }
-      // 3. Forefoot Push-off & Toe Propulsion
+      // 3. Forefoot Push-off (Propulsion)
       else {
         const sub = (normStance - 0.60) / 0.40;
         if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.0;
         if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.04 * (1 - sub);
         if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.06 * (1 - sub);
-        if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.82 * Math.cos(sub * Math.PI * 0.5);
-        if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.95 * Math.sin(sub * Math.PI);
+        if (state.sensors['forefoot_medial']) state.sensors['forefoot_medial'].targetValue = 0.95 * Math.sin(sub * Math.PI);
+        if (state.sensors['forefoot_lateral']) state.sensors['forefoot_lateral'].targetValue = 0.80 * Math.cos(sub * Math.PI * 0.5);
       }
     } else {
       // Swing Phase
       if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.0;
       if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.0;
       if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.0;
-      if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.0;
-      if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.0;
+      if (state.sensors['forefoot_medial']) state.sensors['forefoot_medial'].targetValue = 0.0;
+      if (state.sensors['forefoot_lateral']) state.sensors['forefoot_lateral'].targetValue = 0.0;
     }
   }
 
@@ -1833,32 +1867,32 @@ Provide a concise, professional, structured clinical report covering:
         setVal('heel', 0.90);
         setVal('arch_medial', 0.05);
         setVal('arch_lateral', 0.08);
-        setVal('forefoot', 0.00);
-        setVal('toes', 0.00);
+        setVal('forefoot_medial', 0.00);
+        setVal('forefoot_lateral', 0.00);
         break;
 
       case 'mid': // Midstance
         setVal('heel', 0.35);
         setVal('arch_lateral', 0.35);
         setVal('arch_medial', 0.18);
-        setVal('forefoot', 0.70);
-        setVal('toes', 0.22);
+        setVal('forefoot_medial', 0.60);
+        setVal('forefoot_lateral', 0.70);
         break;
 
-      case 'toe': // Toe off
+      case 'toe': // Forefoot Push-off
         setVal('heel', 0.00);
         setVal('arch_medial', 0.04);
         setVal('arch_lateral', 0.06);
-        setVal('forefoot', 0.75);
-        setVal('toes', 0.95);
+        setVal('forefoot_medial', 0.95);
+        setVal('forefoot_lateral', 0.80);
         break;
 
       case 'full': // Full contact
         setVal('heel', 0.65);
         setVal('arch_lateral', 0.30);
         setVal('arch_medial', 0.20);
-        setVal('forefoot', 0.70);
-        setVal('toes', 0.50);
+        setVal('forefoot_medial', 0.70);
+        setVal('forefoot_lateral', 0.68);
         break;
     }
 
