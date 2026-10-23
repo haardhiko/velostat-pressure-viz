@@ -170,11 +170,13 @@
     isReading: false,
     serialTimestamps: [],
 
-    // Calibration settings for hardware channel
+    // Calibration settings & Velostat Sensitivity Controls
     calibMin: 0,
     calibMax: 4095,
     invertADC: false,
     isCalibrating: false,
+    sensitivity: 0.35, // 0.10 to 1.00 (35% default: significantly less sensitive)
+    deadzone: 0.08,    // 0.00 to 0.25 (8% resting noise deadzone)
 
     // Drag interaction tracking
     isCanvasDragging: false,
@@ -327,6 +329,8 @@
         state.hardwareMappingPreset = parsed.hardwareMappingPreset;
         state.hardwareMapping = { ...HARDWARE_MAPPING_PRESETS[parsed.hardwareMappingPreset] };
       }
+      if (typeof parsed.sensitivity === 'number') state.sensitivity = parsed.sensitivity;
+      if (typeof parsed.deadzone === 'number') state.deadzone = parsed.deadzone;
     }
 
     const savedKey = localStorage.getItem('velostat_nvidia_api_key');
@@ -343,7 +347,9 @@
         calibMax: state.calibMax,
         invertADC: state.invertADC,
         hwMappedSensorId: state.hwMappedSensorId,
-        hardwareMappingPreset: state.hardwareMappingPreset
+        hardwareMappingPreset: state.hardwareMappingPreset,
+        sensitivity: state.sensitivity,
+        deadzone: state.deadzone
       }));
     } catch (_) {}
   }
@@ -1431,13 +1437,23 @@ Provide a concise, professional, structured clinical report covering:
     const max = Math.max(state.calibMin, state.calibMax);
     const span = Math.max(50, max - min);
 
-    let normalized;
+    let rawLinear;
     if (state.invertADC) {
-      normalized = (max - rawVal) / span;
+      rawLinear = (max - rawVal) / span;
     } else {
-      normalized = (rawVal - min) / span;
+      rawLinear = (rawVal - min) / span;
     }
-    normalized = Math.max(0, Math.min(1.0, normalized));
+    rawLinear = Math.max(0, Math.min(1.0, rawLinear));
+
+    // Velostat piezoresistive compensation & sensitivity curve
+    let normalized = 0.0;
+    const deadzone = state.deadzone;
+    if (rawLinear > deadzone) {
+      const active = (rawLinear - deadzone) / (1.0 - deadzone);
+      // Power curve gamma: higher gamma suppresses hypersensitive light touches
+      const gamma = 1.0 + (1.0 - state.sensitivity) * 2.5;
+      normalized = Math.min(1.0, Math.max(0.0, Math.pow(active, gamma)));
+    }
 
     s.targetValue = normalized;
     if (normalized > s.peakValue) s.peakValue = normalized;
@@ -1798,12 +1814,37 @@ Provide a concise, professional, structured clinical report covering:
     }
   }
 
+  function formatSensitivityText(val) {
+    if (val < 25) return `Very Low (${val}%)`;
+    if (val < 45) return `Low (${val}%) - Recommended`;
+    if (val < 65) return `Medium (${val}%)`;
+    if (val < 85) return `High (${val}%)`;
+    return `Ultra High (${val}%)`;
+  }
+
   /* --- UI State Sync --- */
   function updateUI() {
     document.getElementById('toggle-invert').checked = state.invertADC;
     document.getElementById('calib-range').textContent = `${state.calibMin} — ${state.calibMax} ${state.invertADC ? '(Inverted)' : ''}`;
     const mappingSelect = document.getElementById('hw-mapping-preset');
     if (mappingSelect) mappingSelect.value = state.hardwareMappingPreset;
+
+    const sensSlider = document.getElementById('hw-sensitivity-slider');
+    const sensVal = document.getElementById('hw-sensitivity-val');
+    if (sensSlider && sensVal) {
+      const sPct = Math.round(state.sensitivity * 100);
+      sensSlider.value = sPct;
+      sensVal.textContent = formatSensitivityText(sPct);
+    }
+
+    const deadSlider = document.getElementById('hw-deadzone-slider');
+    const deadVal = document.getElementById('hw-deadzone-val');
+    if (deadSlider && deadVal) {
+      const dPct = Math.round(state.deadzone * 100);
+      deadSlider.value = dPct;
+      deadVal.textContent = `${dPct}%`;
+    }
+
     selectSensor(state.selectedSensorId);
   }
 
@@ -2125,6 +2166,28 @@ Provide a concise, professional, structured clinical report covering:
           state.hardwareMapping = { ...HARDWARE_MAPPING_PRESETS[preset] };
           saveCalibration();
         }
+      });
+    }
+
+    const sensSlider = document.getElementById('hw-sensitivity-slider');
+    const sensVal = document.getElementById('hw-sensitivity-val');
+    if (sensSlider) {
+      sensSlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.sensitivity = val / 100;
+        if (sensVal) sensVal.textContent = formatSensitivityText(val);
+        saveCalibration();
+      });
+    }
+
+    const deadSlider = document.getElementById('hw-deadzone-slider');
+    const deadVal = document.getElementById('hw-deadzone-val');
+    if (deadSlider) {
+      deadSlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.deadzone = val / 100;
+        if (deadVal) deadVal.textContent = `${val}%`;
+        saveCalibration();
       });
     }
 

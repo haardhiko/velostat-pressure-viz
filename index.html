@@ -427,6 +427,23 @@
             </label>
           </div>
 
+          <!-- Hardware Sensitivity & Noise Floor Tuning -->
+          <div class="slider-group" style="margin-top: 12px; margin-bottom: 10px;">
+            <div class="slider-header">
+              <label for="hw-sensitivity-slider">Hardware Sensitivity:</label>
+              <span class="slider-val mono" id="hw-sensitivity-val">Low (35%)</span>
+            </div>
+            <input type="range" class="range-slider" id="hw-sensitivity-slider" min="10" max="100" value="35" step="5">
+          </div>
+
+          <div class="slider-group" style="margin-top: 8px; margin-bottom: 12px;">
+            <div class="slider-header">
+              <label for="hw-deadzone-slider">Resting Noise Deadzone:</label>
+              <span class="slider-val mono" id="hw-deadzone-val">8%</span>
+            </div>
+            <input type="range" class="range-slider" id="hw-deadzone-slider" min="0" max="25" value="8" step="1">
+          </div>
+
           <div class="calib-stats">
             <span class="stat-label">Calibrated Range:</span>
             <span class="stat-value mono" id="calib-range">0 &mdash; 4095</span>
