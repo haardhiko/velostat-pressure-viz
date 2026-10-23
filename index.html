@@ -52,24 +52,39 @@
       <div class="test-card-header">
         <div class="test-header-titles">
           <div class="badge-row">
-            <span class="pill-badge pill-cyan">CALIBRATION PROTOCOL</span>
+            <span class="pill-badge pill-cyan">15-CONDITION SCREENING</span>
             <span class="pill-badge pill-purple">CLINICAL REFERENCE DATASETS</span>
-            <span class="pill-badge pill-emerald">NVIDIA NIM LLAMA-3.1</span>
+            <span class="pill-badge pill-emerald">MULTI-PROVIDER LLM (NVIDIA/GEMINI/GROQ)</span>
           </div>
-          <h2>30-Second Walking Gait Calibration & Knee Defect Diagnostics</h2>
+          <h2>30-Second Walking Gait Calibration &amp; Foot Defect Screening</h2>
           <p class="test-description">
-            Put on your insole sensor and walk at your natural, comfortable pace for 30 seconds. The system records 4-region plantar pressure telemetry (toes, forefoot, midfoot, heel), computes ground reaction force vectors, and cross-references clinical reference datasets to identify potential knee defects, joint stress, and gait anomalies.
+            Put on your insole sensor and walk at your natural pace for 30 seconds, or click <strong>Instant Screen</strong> to analyze current pressures immediately. The system evaluates 15 clinical foot defects, abnormalities, and pressure concentrations (Flatfoot, High Arch, Metatarsalgia, Plantar Fasciitis, Diabetic Ulcer Risks) with reference datasets and AI inference.
           </p>
         </div>
 
         <div class="test-actions-group">
-          <button class="btn btn-hero" id="btn-start-test">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-            <span>START 30-SECOND TEST</span>
-          </button>
-          <button class="btn btn-danger" id="btn-cancel-test" style="display: none;">Cancel</button>
+          <div class="banner-controls-row">
+            <button class="btn btn-hero" id="btn-start-test">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span>START 30-SECOND TEST</span>
+            </button>
+            <button class="btn btn-secondary instant-btn" id="btn-instant-evaluate" title="Screen currently active sensor pressure immediately without waiting 30 seconds">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>Instant Screen (Current Pressure)</span>
+            </button>
+            <button class="btn btn-danger" id="btn-cancel-test" style="display: none;">Cancel</button>
+          </div>
+          <div style="margin-top: 6px;">
+            <label class="auto-walk-toggle-label" for="check-auto-walk" title="When checked, generates walking stride cycles in simulation. When unchecked, records your actual live/dragged sensor inputs.">
+              <input type="checkbox" id="check-auto-walk" checked>
+              <span>Simulate Walking Motion (Auto-Walk Demo)</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -170,6 +185,47 @@
             <p class="defect-desc">
               Quantifies midfoot load ratio relative to forefoot/heel to distinguish pes planus (flatfoot collapse) from pes cavus (rigid high-arch supination).
             </p>
+          </div>
+        </div>
+
+        <!-- 15 Plantar Defect & Abnormality Screening Cards (5 Velostat Sensors) -->
+        <div class="screening-section">
+          <div class="screening-header">
+            <div class="screening-title-group">
+              <h4>15-Point Plantar Defect &amp; Pressure-Related Abnormality Screening</h4>
+              <p class="screening-subtitle">
+                Screening based on 5 regional Velostat sensors (2 Forefoot &middot; 2 Midfoot Arch &middot; 1 Heel)
+              </p>
+            </div>
+            <div class="screening-filters">
+              <button class="filter-btn active" id="screening-filter-all" type="button">
+                All 15 Screening Checks <span class="findings-count-pill" id="stat-findings-count">15</span>
+              </button>
+              <button class="filter-btn" id="screening-filter-detected" type="button">
+                Abnormalities Only <span class="findings-count-pill" id="stat-detected-count">0</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="findings-grid" id="screening-findings-grid">
+            <!-- Dynamically populated with the 15 screening cards -->
+          </div>
+
+          <!-- Mandatory Clinical Screening & Technical Limitations Disclaimer Alert Box -->
+          <div class="clinical-screening-disclaimer-box" id="screening-disclaimer-box">
+            <div class="disclaimer-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <div class="disclaimer-body">
+              <h5>Clinical Screening &amp; Limitations Notice</h5>
+              <p>
+                This system analyzes relative plantar pressure patterns from 5 discrete Velostat sensor locations for preliminary biomechanical screening and academic research. <strong>It does not diagnose medical conditions.</strong> Conditions including flatfoot (pes planus), high arch (pes cavus), plantar fasciitis, metatarsalgia, and diabetic foot complications require clinical evaluation, radiographic imaging (e.g. weight-bearing X-rays for Meary's/calcaneal pitch angles), and podiatric examination. Where the 5-sensor layout is insufficient to differentiate subtle anatomical variants, outputs reflect pressure-pattern abnormalities rather than confirmed pathology.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -410,12 +466,16 @@
             </div>
 
             <div class="preset-section">
-              <label>Gait Phase Presets:</label>
-              <div class="preset-group">
+              <label>Gait Phase &amp; Pathology Screening Presets:</label>
+              <div class="preset-group" style="display: flex; flex-wrap: wrap; gap: 6px;">
                 <button class="btn btn-sm" id="btn-preset-heel">1. Heel Strike</button>
                 <button class="btn btn-sm" id="btn-preset-mid">2. Midstance</button>
                 <button class="btn btn-sm" id="btn-preset-toe">3. Toe Off</button>
                 <button class="btn btn-sm" id="btn-preset-full">4. Full Foot</button>
+                <button class="btn btn-sm" id="btn-preset-flatfoot" title="Severe Flat Foot / Arch Collapse (Pes Planus)">5. Flat Foot</button>
+                <button class="btn btn-sm" id="btn-preset-cavus" title="Rigid High Arch (Pes Cavus)">6. High Arch</button>
+                <button class="btn btn-sm" id="btn-preset-metatarsalgia" title="Focal Metatarsalgia Overload">7. Metatarsalgia</button>
+                <button class="btn btn-sm" id="btn-preset-zero" title="Unloaded / Zero Contact (0% Baseline)">8. Zero Load</button>
               </div>
             </div>
           </div>
@@ -463,7 +523,7 @@
     </div>
   </main>
 
-  <!-- ===== 4. Settings Modal: NVIDIA NIM API Integration ===== -->
+  <!-- ===== 4. Settings Modal: Multi-Provider LLM Integration (NVIDIA, Gemini, Groq, OpenAI) ===== -->
   <div class="modal-overlay" id="settings-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="settings-title">
     <div class="modal-card">
       <div class="modal-header">
@@ -472,29 +532,50 @@
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
-          <h3 id="settings-title">NVIDIA AI Clinical Engine Settings</h3>
+          <h3 id="settings-title">AI Clinical Engine Settings (NVIDIA &middot; Gemini &middot; Groq)</h3>
         </div>
         <button class="btn-close-modal" id="btn-close-settings" aria-label="Close settings">&times;</button>
       </div>
 
       <div class="modal-body">
         <p class="modal-desc">
-          Connect your NVIDIA API Key to enable Llama-3.1 clinical inference over the 4-region plantar pressure telemetry and reference dataset comparisons.
+          Connect your API Key to enable AI clinical inference over 15-condition plantar defect screenings, knee moments, and reference datasets.
         </p>
 
         <div class="form-group">
-          <label for="nvidia-api-key-input">NVIDIA API Key (NIM):</label>
-          <div class="input-with-button">
-            <input type="password" id="nvidia-api-key-input" placeholder="nvapi-..." autocomplete="off">
-            <button class="btn btn-sm btn-subtle" id="btn-toggle-key-visibility" type="button">Show</button>
-          </div>
-          <span class="field-hint">
-            Stored securely in your browser's local storage. Never transmitted to third-party servers.
-          </span>
+          <label for="llm-provider-select">Active LLM Provider:</label>
+          <select id="llm-provider-select">
+            <option value="nvidia" selected>NVIDIA NIM (Llama-3.1, Mixtral)</option>
+            <option value="gemini">Google Gemini (Gemini 2.0 Flash, 1.5 Pro)</option>
+            <option value="groq">Groq Cloud (Llama-3.3 70B, Mixtral)</option>
+            <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+            <option value="openrouter">OpenRouter (Multi-Model Hub)</option>
+            <option value="ollama">Ollama / Local LLM (localhost:11434)</option>
+            <option value="custom">Custom OpenAI-Compatible Endpoint</option>
+          </select>
         </div>
 
         <div class="form-group">
-          <label for="nvidia-model-select">Clinical Inference Model:</label>
+          <label for="nvidia-api-key-input" id="lbl-api-key">API Key:</label>
+          <div class="input-with-button">
+            <input type="password" id="nvidia-api-key-input" placeholder="nvapi-... / AIzaSy... / gsk_..." autocomplete="off">
+            <button class="btn btn-sm btn-subtle" id="btn-toggle-key-visibility" type="button">Show</button>
+          </div>
+          <span class="field-hint">
+            Stored securely in your browser's local storage. Never transmitted to third-party tracking servers.
+          </span>
+        </div>
+
+        <div class="form-group" id="llm-custom-url-group" style="display: none;">
+          <label for="llm-custom-url-input">Custom Base URL:</label>
+          <input type="text" id="llm-custom-url-input" placeholder="http://localhost:11434/v1">
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label for="nvidia-model-select">Clinical Inference Model:</label>
+            <button class="btn btn-sm btn-secondary" id="btn-fetch-models" type="button" style="font-size: 0.68rem; padding: 2px 8px;">Fetch Live Models</button>
+          </div>
           <select id="nvidia-model-select">
             <option value="meta/llama-3.1-70b-instruct" selected>meta/llama-3.1-70b-instruct (Recommended for Biomechanics)</option>
             <option value="meta/llama-3.3-70b-instruct">meta/llama-3.3-70b-instruct (Latest High-Precision)</option>
@@ -507,8 +588,8 @@
           Status: Ready. If no API key is provided, the system uses the deterministic biomechanical rule engine.
         </div>
 
-        <div class="nvidia-help-box">
-          <p>Need a free key? Visit <a href="https://build.nvidia.com" target="_blank" rel="noopener">build.nvidia.com</a>, create an account, and generate an API key with free starter credits.</p>
+        <div class="nvidia-help-box" id="provider-help-box">
+          <p>Select your provider above. Free keys are available from <a href="https://build.nvidia.com" target="_blank" rel="noopener">build.nvidia.com</a> (NVIDIA), <a href="https://aistudio.google.com" target="_blank" rel="noopener">aistudio.google.com</a> (Gemini), or <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> (Groq).</p>
         </div>
       </div>
 

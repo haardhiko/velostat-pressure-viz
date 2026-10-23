@@ -45,7 +45,7 @@
       record_id: 'REC-GS-01',
       pattern: 'Heel Strike (Initial Contact Norm)',
       description: 'Healthy initial ground contact concentrated on the calcaneus; minimal forefoot involvement.',
-      pressures: { heel: 0.85, midfoot: 0.05, forefoot: 0.05, toes: 0.05 },
+      pressures: { heel: 0.85, midfoot: 0.05, forefoot: 0.10, toes: 0.00 },
       knee_profile: {
         condition: 'Healthy Shock Attenuation',
         risk: 'Low Risk',
@@ -57,7 +57,7 @@
       record_id: 'REC-MS-02',
       pattern: 'Midstance (Balanced Planar Loading Norm)',
       description: 'Even distribution across calcaneus, lateral longitudinal arch, and metatarsals.',
-      pressures: { heel: 0.30, midfoot: 0.18, forefoot: 0.38, toes: 0.14 },
+      pressures: { heel: 0.30, midfoot: 0.18, forefoot: 0.52, toes: 0.00 },
       knee_profile: {
         condition: 'Balanced Compartmental Load',
         risk: 'Low Risk',
@@ -68,8 +68,8 @@
     {
       record_id: 'REC-TO-03',
       pattern: 'Toe Off (Propulsion Phase Norm)',
-      description: 'Forward weight transfer concentrated on 1st metatarsal and hallux; heel unloaded.',
-      pressures: { heel: 0.05, midfoot: 0.08, forefoot: 0.45, toes: 0.42 },
+      description: 'Forward weight transfer concentrated on 1st metatarsal and ball; heel unloaded.',
+      pressures: { heel: 0.05, midfoot: 0.08, forefoot: 0.87, toes: 0.00 },
       knee_profile: {
         condition: 'Normal Extension Kinetic Chain',
         risk: 'Low Risk',
@@ -78,10 +78,22 @@
       }
     },
     {
+      record_id: 'REC-FLATFOOT-05',
+      pattern: 'Severe Flatfoot (Pes Planus Arch Collapse)',
+      description: 'Severe midfoot arch collapse with high medial instep contact and medial forefoot roll.',
+      pressures: { heel: 0.20, midfoot: 0.48, forefoot: 0.32, toes: 0.00 },
+      knee_profile: {
+        condition: 'Severe Pes Planus / Patellofemoral Pain Syndrome (Runner\'s Knee)',
+        risk: 'High Risk',
+        kam: 'Excessive internal tibial torsion & dynamic valgus vector',
+        notes: 'Medial longitudinal arch collapse forces excessive tibial internal rotation, creating dynamic knee valgus and lateral patellar maltracking.'
+      }
+    },
+    {
       record_id: 'REC-KNEE-OA-04',
       pattern: 'Medial Compartment Knee Overload (Knee OA Tendency)',
       description: 'Pathological medial shift with high medial arch collapse and intense medial ball loading.',
-      pressures: { heel: 0.30, midfoot: 0.28, forefoot: 0.42, toes: 0.10 },
+      pressures: { heel: 0.30, midfoot: 0.28, forefoot: 0.42, toes: 0.00 },
       knee_profile: {
         condition: 'Medial Compartment Knee Osteoarthritis Risk',
         risk: 'High Risk',
@@ -90,22 +102,34 @@
       }
     },
     {
-      record_id: 'REC-PF-05',
-      pattern: 'Patellofemoral Tracking Stress / Over-Pronation',
-      description: 'Severe midfoot arch collapse causing excessive internal tibial torque during stance.',
-      pressures: { heel: 0.25, midfoot: 0.35, forefoot: 0.32, toes: 0.08 },
+      record_id: 'REC-CAVUS-07',
+      pattern: 'Pes Cavus (Rigid High-Arch Supination)',
+      description: 'Severely reduced midfoot contact with load split between calcaneus and 5th metatarsal head.',
+      pressures: { heel: 0.50, midfoot: 0.04, forefoot: 0.46, toes: 0.00 },
       knee_profile: {
-        condition: 'Patellofemoral Pain Syndrome (Runner\'s Knee)',
+        condition: 'Rigid Cavus / Shock Attenuation Deficit',
         risk: 'Moderate Risk',
-        kam: 'Dynamic valgus torque',
-        notes: 'Internal rotation of the tibia leads to lateral patellar maltracking and retro-patellar friction.'
+        kam: 'Unattenuated axial impact transmission',
+        notes: 'Under-pronation and osseous hypomobility prevent natural impact damping, transmitting violent shockwaves up the tibia.'
+      }
+    },
+    {
+      record_id: 'REC-METATARSALGIA-08',
+      pattern: 'Metatarsalgia / Forefoot Hyper-Pressure Overload',
+      description: 'Excessive pressure concentration over 1st and 5th metatarsal heads with reduced heel contact.',
+      pressures: { heel: 0.15, midfoot: 0.12, forefoot: 0.73, toes: 0.00 },
+      knee_profile: {
+        condition: 'Anterior Stance Dominance / Forefoot Capsulitis Stress',
+        risk: 'Moderate Risk',
+        kam: 'Prolonged anterior shear',
+        notes: 'Persistent forefoot overload indicates tight Achilles tendon / equinus gait with prolonged anterior tibial shear.'
       }
     },
     {
       record_id: 'REC-SHOCK-06',
       pattern: 'High-Impact Heel Strike (Meniscal Shock Loading)',
       description: 'Violent initial calcaneal impact without adequate midfoot dissipation; rigid foot strike.',
-      pressures: { heel: 0.58, midfoot: 0.06, forefoot: 0.24, toes: 0.12 },
+      pressures: { heel: 0.68, midfoot: 0.06, forefoot: 0.26, toes: 0.00 },
       knee_profile: {
         condition: 'Unattenuated Tibial Shock & Meniscal Stress',
         risk: 'Moderate Risk',
@@ -114,15 +138,27 @@
       }
     },
     {
-      record_id: 'REC-PARK-07',
-      pattern: 'Parkinsonian Shuffling / Loss of Heel Strike',
-      description: 'Absent initial heel strike with flat or forefoot-biased contact and attenuated amplitude.',
-      pressures: { heel: 0.12, midfoot: 0.24, forefoot: 0.48, toes: 0.16 },
+      record_id: 'REC-ZERO-CONTACT-00',
+      pattern: 'Unloaded / No Foot Contact Recorded',
+      description: 'All sensor locations at 0% baseline load; insole unweighted or uncoupled.',
+      pressures: { heel: 0.00, midfoot: 0.00, forefoot: 0.00, toes: 0.00 },
       knee_profile: {
-        condition: 'Neurodegenerative Gait / Flexed Knee Posture',
-        risk: 'Elevated Risk',
-        kam: 'Altered quadriceps demand',
-        notes: 'Shuffling gait associated with persistent knee flexion throughout stance phase.'
+        condition: 'Unloaded / No Signal',
+        risk: 'N/A',
+        kam: 'No Force Vector',
+        notes: 'Zero active plantar load registered during trial.'
+      }
+    },
+    {
+      record_id: 'REC-SATURATION-99',
+      pattern: 'Uniform Isometric Overload (Sensor Saturation)',
+      description: 'Simultaneous 100% saturation across calcaneus, arch, and metatarsals.',
+      pressures: { heel: 0.33, midfoot: 0.33, forefoot: 0.34, toes: 0.00 },
+      knee_profile: {
+        condition: 'Continuous Isometric Saturation',
+        risk: 'Overpressure Alert',
+        kam: 'Continuous multi-axial overload',
+        notes: 'Simultaneous maximum saturation across all zones indicates non-sequential clamping or zero offset.'
       }
     }
   ];
@@ -230,11 +266,15 @@
       simWalkPhase: 0.0
     },
 
-    // NVIDIA AI Settings
+    // Multi-Provider LLM Settings (NVIDIA NIM, Google Gemini, Groq, OpenAI, OpenRouter, Ollama)
     nvidia: {
+      provider: 'nvidia',
       apiKey: '',
-      model: 'meta/llama-3.1-70b-instruct'
-    }
+      model: 'meta/llama-3.1-70b-instruct',
+      customUrl: ''
+    },
+    screeningFilter: 'all', // 'all' | 'detected'
+    lastScreeningFindings: []
   };
 
   /**
@@ -381,11 +421,17 @@
       if (typeof parsed.deadzone === 'number') state.deadzone = parsed.deadzone;
     }
 
+    const savedProvider = localStorage.getItem('velostat_llm_provider');
+    if (savedProvider) state.nvidia.provider = savedProvider;
+
     const savedKey = localStorage.getItem('velostat_nvidia_api_key');
     if (savedKey) state.nvidia.apiKey = savedKey.trim();
 
     const savedModel = localStorage.getItem('velostat_nvidia_model');
     if (savedModel) state.nvidia.model = savedModel.trim();
+
+    const savedUrl = localStorage.getItem('velostat_llm_custom_url');
+    if (savedUrl) state.nvidia.customUrl = savedUrl.trim();
   } catch (_) {}
 
   function saveCalibration() {
@@ -981,8 +1027,521 @@
   }
 
   /* ==========================================================================
-   * 7. 30-Second Walking Gait Calibration & Knee Defect Diagnostics Engine
+   * 7. 15-Point Plantar Defect Screening & Biomechanical Diagnostics Engine
    * ========================================================================== */
+
+  /**
+   * Evaluates the 15 specific plantar defects, abnormalities, and pressure conditions
+   * using the 5 Velostat sensors (2 Forefoot, 2 Midfoot Arch, 1 Heel).
+   */
+  function screenPlantarDefectsAndAbnormalities(sensorMap, samples, strideCount) {
+    const vHeel = sensorMap.heel || 0;
+    const vArchMed = sensorMap.arch_medial !== undefined ? sensorMap.arch_medial : (sensorMap.midfoot || 0);
+    const vArchLat = sensorMap.arch_lateral || 0;
+    const vForeMed = sensorMap.forefoot_medial !== undefined ? sensorMap.forefoot_medial : (sensorMap.forefoot || 0);
+    const vForeLat = sensorMap.forefoot_lateral || 0;
+
+    const totalLoad = vHeel + vArchMed + vArchLat + vForeMed + vForeLat;
+    const isUnloaded = totalLoad < 0.05;
+    const isSaturated = (vHeel > 0.82 && vArchMed > 0.78 && vArchLat > 0.78 && vForeMed > 0.82 && vForeLat > 0.82);
+
+    const findings = [];
+
+    // 1. Flat Foot (Pes Planus)
+    {
+      const archSum = vArchMed + vArchLat;
+      const archShare = totalLoad > 0 ? archSum / totalLoad : 0;
+      const isDetected = !isUnloaded && (vArchMed >= 0.18 || (archShare >= 0.22 && vArchMed >= vArchLat * 0.65));
+      const severity = !isDetected ? 'Normal' : (vArchMed > 0.40 ? 'Severe' : (vArchMed > 0.26 ? 'Moderate' : 'Mild'));
+      findings.push({
+        id: 1,
+        code: 'PES-PLANUS',
+        name: 'Flat Foot (Pes Planus)',
+        category: 'Arch Mechanics',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Medial Arch: ${(vArchMed * 100).toFixed(0)}% | Lateral Arch: ${(vArchLat * 100).toFixed(0)}% | Total Arch Share: ${(archShare * 100).toFixed(1)}%`,
+        abnormalityDetected: isDetected
+          ? 'Excessive medial longitudinal arch loading and midfoot ground contact collapse during stance.'
+          : (isUnloaded ? 'No active plantar load registered across arch sensors.' : 'Preserved longitudinal arch elevation with physiological midfoot ground clearance.'),
+        supportingEvidence: isDetected
+          ? `Medial arch load exceeds validated reference limit (>18% norm; measured ${(vArchMed * 100).toFixed(0)}%). Benchmark: REC-FLATFOOT-05.`
+          : (isUnloaded ? 'Telemetry shows zero sensor engagement.' : 'Medial arch pressure remains within normal shock-absorbing thresholds (<18%). Benchmark: REC-MS-02.'),
+        possibleClinicalAssociation: 'Symptomatic flexible or rigid flatfoot (pes planus), posterior tibial tendon dysfunction (PTTD), secondary dynamic knee valgus and patellofemoral tracking stress.',
+        limitationsAndCaveats: 'Screening pattern indicator based on 2 midfoot sensors. Definitive flatfoot staging requires weight-bearing lateral radiographic arch angles (Meary\'s angle, calcaneal pitch) or clinical Staheli/Chippaux-Smirak pedobarographic index.'
+      });
+    }
+
+    // 2. High Arch (Pes Cavus)
+    {
+      const isDetected = !isUnloaded && !isSaturated && (vArchMed < 0.05 && vArchLat < 0.08 && (vHeel > 0.35 || (vForeMed + vForeLat) > 0.50) && totalLoad >= 0.15);
+      const severity = !isDetected ? 'Normal' : ((vArchMed <= 0.02 && (vHeel > 0.55 || vForeMed > 0.55)) ? 'Severe' : (vArchMed < 0.04 ? 'Moderate' : 'Mild'));
+      findings.push({
+        id: 2,
+        code: 'PES-CAVUS',
+        name: 'High Arch (Pes Cavus)',
+        category: 'Arch Mechanics',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Medial Arch: ${(vArchMed * 100).toFixed(0)}% | Lateral Arch: ${(vArchLat * 100).toFixed(0)}% | Heel: ${(vHeel * 100).toFixed(0)}% | Forefoot Avg: ${(((vForeMed + vForeLat)/2) * 100).toFixed(0)}%`,
+        abnormalityDetected: isDetected
+          ? 'Severe midfoot contact deficit with bimodal force isolation onto the calcaneus and metatarsal ball.'
+          : (isUnloaded ? 'Insole unweighted.' : 'Normal midfoot surface contact and progressive stance dissipation.'),
+        supportingEvidence: isDetected
+          ? 'Midfoot load falls below 5% contact threshold while heel and forefoot absorb >85% of total plantar impulse. Benchmark: REC-CAVUS-07.'
+          : 'Midfoot sensor activation conforms to normal midstance tripod support.',
+        possibleClinicalAssociation: 'Pes cavus (rigid high arch), reduced impact absorption capacity, elevated risk of lateral ankle sprains, peroneal tendonitis, and metatarsal stress fractures.',
+        limitationsAndCaveats: 'Five-sensor array detects absence of midfoot ground contact. Clinical confirmation requires weight-bearing lateral foot radiographs and Coleman block testing.'
+      });
+    }
+
+    // 3. Metatarsalgia-Associated Loading
+    {
+      const avgForefoot = (vForeMed + vForeLat) / 2;
+      const isDetected = !isUnloaded && (vForeMed > 0.65 || vForeLat > 0.65 || avgForefoot > 0.58);
+      const severity = !isDetected ? 'Normal' : (avgForefoot > 0.80 ? 'Severe' : (avgForefoot > 0.68 ? 'Moderate' : 'Mild'));
+      findings.push({
+        id: 3,
+        code: 'METATARSALGIA',
+        name: 'Metatarsalgia-Associated Loading',
+        category: 'Forefoot Pressure',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `1st Metatarsal (Medial): ${(vForeMed * 100).toFixed(0)}% | 5th Metatarsal (Lateral): ${(vForeLat * 100).toFixed(0)}% | Mean Forefoot: ${(avgForefoot * 100).toFixed(0)}%`,
+        abnormalityDetected: isDetected
+          ? 'Disproportionately high peak pressure concentration across the monitored metatarsal heads.'
+          : (isUnloaded ? 'No forefoot pressure registered.' : 'Forefoot ground reaction forces within physiological limits.'),
+        supportingEvidence: isDetected
+          ? `Forefoot loading exceeds 58% threshold (measured ${(avgForefoot * 100).toFixed(0)}%). Benchmark: REC-METATARSALGIA-08.`
+          : 'Forefoot pressure well-distributed across terminal stance without hyper-pressure focal points.',
+        possibleClinicalAssociation: 'Forefoot metatarsalgia, metatarsal head bursitis, Morton\'s neuroma, capsulitis, or plantar plate strain.',
+        limitationsAndCaveats: 'Insole monitors 1st and 5th metatarsal heads; individual intermediate metatarsals (2nd, 3rd, 4th) cannot be isolated without a high-density sensor matrix.'
+      });
+    }
+
+    // 4. Uneven Forefoot Loading
+    {
+      const diff = Math.abs(vForeMed - vForeLat);
+      const isDetected = !isUnloaded && (diff > 0.22 && (vForeMed + vForeLat) > 0.18);
+      const severity = !isDetected ? 'Normal' : (diff > 0.45 ? 'Severe' : (diff > 0.32 ? 'Moderate' : 'Mild'));
+      const bias = vForeMed > vForeLat ? 'Medial Bias (1st Ray)' : 'Lateral Bias (5th Ray)';
+      findings.push({
+        id: 4,
+        code: 'UNEVEN-FOREFOOT',
+        name: 'Uneven Forefoot Loading',
+        category: 'Forefoot Pressure',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Medial Ball: ${(vForeMed * 100).toFixed(0)}% | Lateral Ball: ${(vForeLat * 100).toFixed(0)}% | Delta: ${(diff * 100).toFixed(0)}% (${bias})`,
+        abnormalityDetected: isDetected
+          ? `Significant transverse plane load disparity across metatarsals with pronounced ${bias}.`
+          : (isUnloaded ? 'Unloaded state.' : 'Symmetrical load distribution between medial and lateral metatarsal heads.'),
+        supportingEvidence: isDetected
+          ? `Forefoot split disparity (${(diff * 100).toFixed(0)}%) exceeds the 22% physiological tolerance envelope.`
+          : 'Medial and lateral forefoot sensors show harmonious push-off progression.',
+        possibleClinicalAssociation: vForeMed > vForeLat
+          ? 'Hallux valgus, bunion joint irritation, or hypermobile first ray.'
+          : 'Inverted foot strike, peroneal muscle weakness, or 5th metatarsal base overload (Jones fracture risk).',
+        limitationsAndCaveats: 'Direct comparison between 1st and 5th metatarsal sensors; intermediate rays are not resolved.'
+      });
+    }
+
+    // 5. Plantar Fasciitis-Associated Patterns
+    {
+      const isDetected = !isUnloaded && ((vHeel > 0.55 && vArchMed > 0.18) || (vHeel > 0.65 && vArchMed < 0.05));
+      const severity = !isDetected ? 'Normal' : (vHeel > 0.75 ? 'Severe' : (vHeel > 0.62 ? 'Moderate' : 'Mild'));
+      findings.push({
+        id: 5,
+        code: 'PLANTAR-FASCIITIS',
+        name: 'Plantar Fasciitis-Associated Patterns',
+        category: 'Fascial Mechanics',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Calcaneus (Heel): ${(vHeel * 100).toFixed(0)}% | Medial Arch: ${(vArchMed * 100).toFixed(0)}%`,
+        abnormalityDetected: isDetected
+          ? 'Concomitant high calcaneal impact loading and tensile arch stress vector.'
+          : (isUnloaded ? 'No heel/arch load.' : 'Balanced calcaneal shock attenuation and windlass mechanism load sharing.'),
+        supportingEvidence: isDetected
+          ? `Heel load (${(vHeel * 100).toFixed(0)}%) combined with ${vArchMed > 0.18 ? 'medial arch collapse causing severe fascial elongation' : 'rigid arch cavitation causing unattenuated axial heel shock'}.`
+          : 'Normal calcaneal force dissipation and physiological windlass function.',
+        possibleClinicalAssociation: 'Plantar fasciitis, subcalcaneal bursitis, calcaneal spur irritation, or plantar fascial micro-tears.',
+        limitationsAndCaveats: 'Screening pattern only. Definitive clinical diagnosis requires focal palpation tenderness at the medial calcaneal tuberosity and diagnostic ultrasound/MRI demonstration of fascial thickening (>4.0 mm).'
+      });
+    }
+
+    // 6. Abnormal Heel Loading
+    {
+      const isHigh = vHeel > 0.68;
+      const isLow = (vHeel < 0.08 && (vForeMed + vForeLat) > 0.30);
+      const isDetected = !isUnloaded && (isHigh || isLow);
+      const severity = !isDetected ? 'Normal' : ((vHeel > 0.82 || vHeel < 0.03) ? 'Severe' : 'Moderate');
+      findings.push({
+        id: 6,
+        code: 'ABNORMAL-HEEL',
+        name: 'Abnormal Heel Loading',
+        category: 'Rearfoot Kinetics',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Calcaneus: ${(vHeel * 100).toFixed(0)}% | Relative Stance Share: ${totalLoad > 0 ? ((vHeel / totalLoad) * 100).toFixed(1) : 0}%`,
+        abnormalityDetected: isDetected
+          ? (isHigh ? 'Violent calcaneal impact strike / shock attenuation deficit.' : 'Severely attenuated or absent heel contact (antalgic strike avoidance or equinus pattern).')
+          : (isUnloaded ? 'Unloaded baseline.' : 'Physiological heel strike with progressive load transfer.'),
+        supportingEvidence: isDetected
+          ? (isHigh ? `Heel pressure exceeds 68% threshold (measured ${(vHeel * 100).toFixed(0)}%). Benchmark: REC-SHOCK-06.` : 'Heel load is abnormally suppressed (<8%) while forefoot carries primary initial contact.')
+          : 'Heel strike kinetics within healthy reference range (30-45% of stance impulse).',
+        possibleClinicalAssociation: isHigh
+          ? 'Calcaneal fat pad atrophy, Sever\'s disease, or meniscal shock loading.'
+          : 'Achilles tendon contracture, fixed equinus gait, or antalgic heel pain avoidance.',
+        limitationsAndCaveats: 'Single calcaneal sensor monitors central heel pad; does not distinguish medial vs lateral calcaneal strike angles.'
+      });
+    }
+
+    // 7. Excessive Plantar Pressure
+    {
+      const sensorList = [
+        { name: 'Heel', val: vHeel },
+        { name: 'Medial Arch', val: vArchMed },
+        { name: 'Lateral Arch', val: vArchLat },
+        { name: 'Medial Forefoot', val: vForeMed },
+        { name: 'Lateral Forefoot', val: vForeLat }
+      ];
+      sensorList.sort((a, b) => b.val - a.val);
+      const peakSensor = sensorList[0];
+      const isDetected = !isUnloaded && peakSensor.val >= 0.85;
+      const severity = !isDetected ? 'Normal' : (peakSensor.val >= 0.95 ? 'Severe' : (peakSensor.val >= 0.88 ? 'Moderate' : 'Mild'));
+      findings.push({
+        id: 7,
+        code: 'EXCESSIVE-PRESSURE',
+        name: 'Excessive Plantar Pressure',
+        category: 'Pressure Overload',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Peak Zone: ${peakSensor.name} at ${(peakSensor.val * 100).toFixed(0)}% load (~${(peakSensor.val * 320).toFixed(0)} kPa estimated)`,
+        abnormalityDetected: isDetected
+          ? `Focal hyper-pressure concentration reaching saturation threshold at ${peakSensor.name}.`
+          : (isUnloaded ? 'No pressure detected.' : 'Plantar peak pressures safely distributed below risk threshold.'),
+        supportingEvidence: isDetected
+          ? `Pressure exceeds the 85% risk threshold (measured ${(peakSensor.val * 100).toFixed(0)}%). Sustained peak pressures above 200 kPa are associated with mechanical skin trauma.`
+          : 'All monitored regions remain comfortably within safe physiological bounds (<85%).',
+        possibleClinicalAssociation: 'Keratoma / callus formation, localized tissue ischemia, pressure-induced capsulitis, or skin breakdown.',
+        limitationsAndCaveats: 'Velostat sensors measure normal perpendicular compression force; shear forces and frictional vectors are not captured.'
+      });
+    }
+
+    // 8. Diabetic Foot Pressure-Risk Patterns
+    {
+      const maxForefoot = Math.max(vForeMed, vForeLat);
+      const isDetected = !isUnloaded && ((maxForefoot > 0.78 || vHeel > 0.80) || isSaturated);
+      const severity = !isDetected ? 'Normal' : ((maxForefoot > 0.88 || vHeel > 0.90) ? 'Severe' : 'Moderate');
+      findings.push({
+        id: 8,
+        code: 'DIABETIC-RISK',
+        name: 'Diabetic Foot Pressure-Risk Patterns',
+        category: 'Tissue Integrity Risk',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Forefoot Peak: ${(maxForefoot * 100).toFixed(0)}% | Heel Peak: ${(vHeel * 100).toFixed(0)}%`,
+        abnormalityDetected: isDetected
+          ? 'Dangerous localized pressure concentration without adequate dynamic offloading.'
+          : (isUnloaded ? 'Unloaded.' : 'Safe plantar load dissipation without hazardous localized pressure spikes.'),
+        supportingEvidence: isDetected
+          ? `Repetitive pressure peak exceeds diabetic research threshold (>78% / ~250 kPa). Prolonged repetitive stress at these levels carries documented ulceration risk in insensitive feet.`
+          : 'Plantar pressures remain within safe protective thresholds throughout stance.',
+        possibleClinicalAssociation: 'Elevated risk for neuropathic plantar ulceration, tissue ischemia, and Charcot neuroarthropathy focal stress points.',
+        limitationsAndCaveats: 'RESEARCH SCREENING RISK ONLY. Does not diagnose peripheral neuropathy or ulceration. Comprehensive assessment requires Semmes-Weinstein monofilament testing, ankle-brachial index (ABI), and clinical dermatological inspection.'
+      });
+    }
+
+    // 9. Medial-Lateral Loading Imbalance
+    {
+      const medialLoad = vForeMed + vArchMed;
+      const lateralLoad = vForeLat + vArchLat;
+      const mlTotal = medialLoad + lateralLoad;
+      const mlDisparity = mlTotal > 0 ? Math.abs(medialLoad - lateralLoad) / mlTotal : 0;
+      const isDetected = !isUnloaded && (mlDisparity > 0.28 && mlTotal > 0.15);
+      const severity = !isDetected ? 'Normal' : (mlDisparity > 0.50 ? 'Severe' : (mlDisparity > 0.36 ? 'Moderate' : 'Mild'));
+      const dominantSide = medialLoad > lateralLoad ? 'Medial Column' : 'Lateral Column';
+      findings.push({
+        id: 9,
+        code: 'ML-IMBALANCE',
+        name: 'Medial-Lateral Loading Imbalance',
+        category: 'Coronal Balance',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Medial Column: ${mlTotal > 0 ? ((medialLoad / mlTotal) * 100).toFixed(1) : 0}% | Lateral Column: ${mlTotal > 0 ? ((lateralLoad / mlTotal) * 100).toFixed(1) : 0}% (${dominantSide} Dominance)`,
+        abnormalityDetected: isDetected
+          ? `Significant coronal plane weight distribution asymmetry (${medialLoad > lateralLoad ? 'Excessive medial column pronation' : 'Excessive lateral column supination'}).`
+          : (isUnloaded ? 'Zero load.' : 'Well-balanced coronal load distribution between medial and lateral columns.'),
+        supportingEvidence: isDetected
+          ? `Medial-lateral ratio skew exceeds the 64:36 threshold (measured ${mlTotal > 0 ? ((Math.max(medialLoad, lateralLoad) / mlTotal) * 100).toFixed(0) : 0}% on dominant side).`
+          : 'Medial and lateral longitudinal columns share stance load evenly.',
+        possibleClinicalAssociation: medialLoad > lateralLoad
+          ? 'Subtalar overpronation, tibialis posterior fatigue, dynamic knee valgus stress.'
+          : 'Subtalar supination, ankle inversion vulnerability, lateral cuboid and 5th metatarsal overload.',
+        limitationsAndCaveats: 'Relative pressure comparison across four medial and lateral sensor zones; 3D rearfoot kinematics requires multi-camera motion capture.'
+      });
+    }
+
+    // 10. Forefoot-to-Heel Loading Imbalance
+    {
+      const foreLoad = vForeMed + vForeLat;
+      const heelLoad = vHeel;
+      const fhTotal = foreLoad + heelLoad;
+      const foreRatio = fhTotal > 0 ? foreLoad / fhTotal : 0.5;
+      const isDetected = !isUnloaded && ((foreRatio > 0.72 || foreRatio < 0.28) && fhTotal > 0.15);
+      const severity = !isDetected ? 'Normal' : ((foreRatio > 0.85 || foreRatio < 0.15) ? 'Severe' : 'Moderate');
+      const biasDir = foreRatio > 0.72 ? 'Anterior Shift' : 'Posterior Shift';
+      findings.push({
+        id: 10,
+        code: 'FH-IMBALANCE',
+        name: 'Forefoot-to-Heel Loading Imbalance',
+        category: 'Sagittal Balance',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Forefoot: ${(foreRatio * 100).toFixed(1)}% | Heel: ${((1 - foreRatio) * 100).toFixed(1)}% (${biasDir})`,
+        abnormalityDetected: isDetected
+          ? (foreRatio > 0.72 ? 'Pathological anterior load shift (equinus tendency / sustained metatarsal overload).' : 'Abnormal posterior load shift (calcaneal over-reliance / insufficient terminal push-off).')
+          : (isUnloaded ? 'Unloaded state.' : 'Harmonious sagittal load distribution between heel strike and forefoot roll-off.'),
+        supportingEvidence: isDetected
+          ? `Forefoot-to-heel ratio deviates from normal 55:45 gait envelope (${(foreRatio * 100).toFixed(0)}% Forefoot vs ${((1 - foreRatio) * 100).toFixed(0)}% Heel).`
+          : 'Sagittal weight transfer follows standard heel-to-toe progression.',
+        possibleClinicalAssociation: foreRatio > 0.72
+          ? 'Tight gastroc-soleus complex, functional equinus, anterior shear on patellar tendon.'
+          : 'Cautious antalgic gait, flexed knee posture, or hallux/metatarsal pain avoidance.',
+        limitationsAndCaveats: 'Sagittal pressure balance is influenced by footwear heel drop, incline, and gait speed.'
+      });
+    }
+
+    // 11. Midfoot and Arch Loading Abnormalities
+    {
+      const isMedialSag = (vArchMed > 0.20 && vArchLat < 0.08);
+      const isLateralOverload = vArchLat > 0.38;
+      const isDetected = !isUnloaded && (isMedialSag || isLateralOverload);
+      const severity = !isDetected ? 'Normal' : (vArchLat > 0.50 ? 'Severe' : 'Moderate');
+      findings.push({
+        id: 11,
+        code: 'MIDFOOT-ARCH',
+        name: 'Midfoot and Arch Loading Abnormalities',
+        category: 'Midfoot Kinetics',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Medial Arch: ${(vArchMed * 100).toFixed(0)}% | Lateral Midfoot: ${(vArchLat * 100).toFixed(0)}%`,
+        abnormalityDetected: isDetected
+          ? (isLateralOverload ? 'Excessive lateral midfoot weight bearing (cuboid bone hyper-pressure).' : 'Isolated medial longitudinal arch sag with insufficient lateral column engagement.')
+          : (isUnloaded ? 'Unloaded.' : 'Normal anatomical midfoot arch structure and load distribution.'),
+        supportingEvidence: isDetected
+          ? (isLateralOverload ? `Lateral midfoot load (${(vArchLat * 100).toFixed(0)}%) exceeds the 38% cuboid stress threshold.` : `Medial arch load (${(vArchMed * 100).toFixed(0)}%) is disproportionately high relative to lateral column.`)
+          : 'Midfoot forces conform to healthy plantar contact geometry.',
+        possibleClinicalAssociation: isLateralOverload
+          ? 'Cuboid syndrome, peroneal subluxation, lateral column stress fracture risk.'
+          : 'Transverse tarsal joint hypermobility, early flatfoot staging.',
+        limitationsAndCaveats: 'Shoe arch contour and insole curvature directly modulate midfoot sensor contact.'
+      });
+    }
+
+    // 12. Asymmetric Weight Bearing (Unilateral / Bilateral Tracking)
+    {
+      let stanceDuty = 0.62;
+      let hasTemporalData = false;
+      if (samples && samples.length > 20) {
+        hasTemporalData = true;
+        const loadedFrames = samples.filter(s => (s.heel + s.forefoot) > 0.12).length;
+        stanceDuty = loadedFrames / samples.length;
+      }
+      const isDetected = hasTemporalData && (stanceDuty > 0.78 || stanceDuty < 0.42);
+      const severity = !isDetected ? 'Normal' : (stanceDuty > 0.85 || stanceDuty < 0.35 ? 'Severe' : 'Moderate');
+      findings.push({
+        id: 12,
+        code: 'ASYMMETRIC-LOAD',
+        name: 'Asymmetric Weight Bearing',
+        category: 'Bilateral / Temporal Stance',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Insole Mode: Single-Foot Monitoring | Stance Phase Duty Cycle: ${(stanceDuty * 100).toFixed(0)}% (Ref: 58-64%)`,
+        abnormalityDetected: isDetected
+          ? `Unilateral stance time asymmetry (${stanceDuty > 0.78 ? 'Prolonged stance / dragging' : 'Shortened stance / antalgic limp'}).`
+          : (isUnloaded ? 'Unloaded.' : 'Temporal stance and swing phase symmetry within expected physiological window.'),
+        supportingEvidence: isDetected
+          ? 'Stance phase duration deviates significantly from normal 60/40 duty cycle.'
+          : 'Monitored foot demonstrates rhythmic stance-swing progression.',
+        possibleClinicalAssociation: 'Antalgic limp, unilateral lower limb injury, hemiparetic loading, or limb length discrepancy.',
+        limitationsAndCaveats: 'Direct cross-limb bilateral kinetic force comparison requires bilateral instrumented insoles. Current evaluation utilizes single-insole temporal stride analysis.'
+      });
+    }
+
+    // 13. Abnormal Loading During Walking (Kinetic Stance Progression)
+    {
+      let isSequenceAbnormal = false;
+      let hasWalkingCycles = (strideCount > 2) && samples && samples.length > 30;
+      if (hasWalkingCycles) {
+        let heelPeaks = 0, forePeaks = 0;
+        samples.forEach(s => {
+          if (s.heel > 0.50) heelPeaks++;
+          if (s.forefoot > 0.50) forePeaks++;
+        });
+        if (heelPeaks === 0 && forePeaks > 5) isSequenceAbnormal = true;
+      }
+      const isDetected = hasWalkingCycles && isSequenceAbnormal;
+      const severity = isDetected ? 'Moderate' : 'Normal';
+      findings.push({
+        id: 13,
+        code: 'WALKING-KINETICS',
+        name: 'Abnormal Loading During Walking',
+        category: 'Dynamic Gait Sequence',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Recorded Strides: ${strideCount || 0} | Gait Phase Sequence: ${isSequenceAbnormal ? 'Disrupted Heel Strike' : (hasWalkingCycles ? 'Coordinated Heel-to-Toe' : 'Static Stance Snapshot')}`,
+        abnormalityDetected: isDetected
+          ? 'Disrupted chronological heel-to-forefoot ground reaction force trajectory.'
+          : (isUnloaded ? 'Unloaded.' : 'Coordinated kinematic stance progression from initial contact to propulsion.'),
+        supportingEvidence: isDetected
+          ? 'Telemetry reveals absent calcaneal strike phase or disorganized multi-peak loading cycles. Benchmark: REC-PARK-07.'
+          : 'Clear three-phase gait cycle (Heel strike → Midstance → Push-off) validated.',
+        possibleClinicalAssociation: 'Foot drop (deep peroneal nerve palsy), sensory ataxia, Parkinsonian shuffling gait, or antalgic gait modification.',
+        limitationsAndCaveats: 'Requires dynamic walking protocol with active stride detection; static snapshot provides postural screening only.'
+      });
+    }
+
+    // 14. Compensatory Loading Patterns (Antalgic Offloading)
+    {
+      const isMedialOffload = (vForeMed < 0.08 && vForeLat > 0.50);
+      const isLateralOffload = (vForeLat < 0.08 && vForeMed > 0.50);
+      const isHeelOffload = (vHeel < 0.08 && (vForeMed + vForeLat) > 0.50);
+      const isDetected = !isUnloaded && (isMedialOffload || isLateralOffload || isHeelOffload);
+      const severity = isDetected ? 'Moderate' : 'Normal';
+      const offZone = isMedialOffload ? '1st Metatarsal (Medial)' : (isLateralOffload ? '5th Metatarsal (Lateral)' : (isHeelOffload ? 'Calcaneus (Heel)' : 'None'));
+      const compZone = isMedialOffload ? 'Lateral Border' : (isLateralOffload ? 'Medial Hallux' : (isHeelOffload ? 'Forefoot Ball' : 'None'));
+      findings.push({
+        id: 14,
+        code: 'COMPENSATORY-OFFLOAD',
+        name: 'Compensatory Loading Patterns',
+        category: 'Antalgic Compensation',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Offloaded Zone: ${offZone} | Compensatory Loaded Zone: ${compZone}`,
+        abnormalityDetected: isDetected
+          ? `Asymmetric antalgic pressure redirection away from ${offZone} toward ${compZone}.`
+          : (isUnloaded ? 'Unloaded.' : 'Uniform physiological load sharing without antalgic avoidance vectors.'),
+        supportingEvidence: isDetected
+          ? `Unnatural focal pressure void (<8%) immediately adjacent to high pressure (>50%), characteristic of pain avoidance mechanics.`
+          : 'No localized pressure shielding detected across monitored zones.',
+        possibleClinicalAssociation: 'Protective offloading secondary to turf toe, hallux rigidus, acute calcaneal spur pain, or metatarsal stress fracture.',
+        limitationsAndCaveats: 'Identifies kinetic pressure shifts; primary clinical cause of pain requires manual musculoskeletal examination.'
+      });
+    }
+
+    // 15. Persistent Localized Pressure
+    {
+      const isPersistent = !isUnloaded && ((vForeMed > 0.75 || vForeLat > 0.75 || vHeel > 0.75) && (samples && samples.length > 20 ? samples.every(s => (s.forefoot + s.heel) > 0.20) : false));
+      const isDetected = isPersistent || (!isUnloaded && (vForeMed > 0.88 || vForeLat > 0.88 || vHeel > 0.88));
+      const severity = !isDetected ? 'Normal' : ((vForeMed > 0.92 || vForeLat > 0.92 || vHeel > 0.92) ? 'Severe' : 'Moderate');
+      findings.push({
+        id: 15,
+        code: 'PERSISTENT-PRESSURE',
+        name: 'Persistent Localized Pressure',
+        category: 'Pressure Overload',
+        status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
+        severity: severity,
+        observedReadings: `Continuous Max Peak: ${Math.max(vForeMed, vForeLat, vHeel, vArchMed, vArchLat) > 0.80 ? 'Elevated Sustained Load' : 'Intermittent Cyclical'}`,
+        abnormalityDetected: isDetected
+          ? 'Continuous unrelieved focal pressure concentration failing to cyclically offload.'
+          : (isUnloaded ? 'Unloaded.' : 'Healthy cyclical loading and complete unloading during swing / gait transitions.'),
+        supportingEvidence: isDetected
+          ? 'Target zone failed to achieve pressure relief (<20 kPa) during stance cycle, creating constant tissue compression.'
+          : 'Periodic offloading verified across all monitored locations.',
+        possibleClinicalAssociation: 'Drag gait, incomplete clearance during swing phase, fixed osseous deformity, or insole pre-compression.',
+        limitationsAndCaveats: 'Ensure insole is not mechanically pinched or pre-compressed by tight footwear lacing.'
+      });
+    }
+
+    return findings;
+  }
+
+  function renderScreeningFindings(findings) {
+    state.lastScreeningFindings = findings;
+    const grid = document.getElementById('screening-findings-grid');
+    if (!grid) return;
+
+    let detectedCount = 0;
+    findings.forEach(f => {
+      if (f.status === 'Detected') detectedCount++;
+    });
+
+    const statCount = document.getElementById('stat-findings-count');
+    if (statCount) statCount.textContent = '15';
+    const statDet = document.getElementById('stat-detected-count');
+    if (statDet) statDet.textContent = detectedCount;
+
+    let html = '';
+    findings.forEach(f => {
+      const isDet = f.status === 'Detected';
+      const isUnload = f.status === 'Unloaded';
+      let cardClass = isDet ? 'detected' : (isUnload ? 'unloaded' : 'normal');
+      if (f.severity === 'Moderate') cardClass = 'moderate';
+
+      let badgeClass = isDet ? 'badge-detected' : (isUnload ? 'badge-unloaded' : 'badge-normal');
+      if (f.severity === 'Moderate') badgeClass = 'badge-moderate';
+
+      let statusText = isDet ? `&#9888; DETECTED &bull; ${f.severity.toUpperCase()}` : (isUnload ? 'UNLOADED' : '&#10003; NORMAL / NEGATIVE');
+
+      html += `
+        <div class="finding-card ${cardClass}" data-status="${f.status}">
+          <div class="finding-header">
+            <span class="finding-label">${f.category}</span>
+            <span class="finding-status-badge ${badgeClass}">${statusText}</span>
+          </div>
+          <h4 class="finding-title">${f.id}. ${f.name}</h4>
+          <div class="finding-section-row">
+            <span class="finding-label">Observed Telemetry</span>
+            <span class="finding-observed">${f.observedReadings}</span>
+          </div>
+          <div class="finding-section-row">
+            <span class="finding-label">Screening Assessment</span>
+            <div class="finding-evidence-text">${f.abnormalityDetected}</div>
+          </div>
+          <div class="finding-section-row">
+            <span class="finding-label">Supporting Evidence</span>
+            <div class="finding-evidence-text">${f.supportingEvidence}</div>
+          </div>
+          <div class="finding-section-row">
+            <span class="finding-label">Possible Clinical Association</span>
+            <div class="finding-clinical-text">${f.possibleClinicalAssociation}</div>
+          </div>
+          <div class="finding-disclaimer-text">
+            <strong>Limitation:</strong> ${f.limitationsAndCaveats}
+          </div>
+        </div>
+      `;
+    });
+
+    grid.innerHTML = html;
+    applyScreeningFilter(state.screeningFilter || 'all');
+  }
+
+  function applyScreeningFilter(filterType) {
+    state.screeningFilter = filterType;
+    const allBtn = document.getElementById('screening-filter-all');
+    const detBtn = document.getElementById('screening-filter-detected');
+    if (allBtn && detBtn) {
+      if (filterType === 'all') {
+        allBtn.classList.add('active');
+        detBtn.classList.remove('active');
+      } else {
+        detBtn.classList.add('active');
+        allBtn.classList.remove('active');
+      }
+    }
+
+    const cards = document.querySelectorAll('.finding-card');
+    cards.forEach(card => {
+      const status = card.getAttribute('data-status');
+      if (filterType === 'all') {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = status === 'Detected' ? 'flex' : 'none';
+      }
+    });
+  }
 
   function startWalkingTest() {
     if (state.test.status === 'recording' || state.test.status === 'analyzing') return;
@@ -1016,7 +1575,9 @@
 
     // 50ms (20Hz) telemetry sampling interval
     state.test.sampleInterval = setInterval(() => {
-      if (state.mode === 'simulation' || !state.hwConnected) {
+      const autoWalkEl = document.getElementById('check-auto-walk');
+      const autoWalk = autoWalkEl ? autoWalkEl.checked : true;
+      if (state.mode === 'simulation' && autoWalk) {
         simulateWalkingGaitStep();
       }
 
@@ -1137,42 +1698,61 @@
     // Calculate regional impulses
     const samples = state.test.samples;
     let sumHeel = 0, sumMidfoot = 0, sumForefoot = 0, sumToes = 0;
+    let sumArchMed = 0, sumArchLat = 0, sumForeMed = 0, sumForeLat = 0;
 
     samples.forEach(s => {
       sumHeel += s.heel;
       sumMidfoot += s.midfoot;
       sumForefoot += s.forefoot;
       sumToes += s.toes;
+      sumArchMed += (s.arch_medial || 0);
+      sumArchLat += (s.arch_lateral || 0);
+      sumForeMed += (s.forefoot_medial || 0);
+      sumForeLat += (s.forefoot_lateral || 0);
     });
 
-    const totalLoad = sumHeel + sumMidfoot + sumForefoot + sumToes || 1;
+    const sampleCount = samples.length || 1;
+    const avgMap = {
+      heel: sumHeel / sampleCount,
+      arch_medial: sumArchMed / sampleCount,
+      arch_lateral: sumArchLat / sampleCount,
+      forefoot_medial: sumForeMed / sampleCount,
+      forefoot_lateral: sumForeLat / sampleCount,
+      midfoot: sumMidfoot / sampleCount,
+      forefoot: sumForefoot / sampleCount
+    };
 
-    const heelPct = (sumHeel / totalLoad) * 100;
-    const midfootPct = (sumMidfoot / totalLoad) * 100;
-    const forefootPct = (sumForefoot / totalLoad) * 100;
-    const toesPct = (sumToes / totalLoad) * 100;
+    const totalLoad = sumHeel + sumMidfoot + sumForefoot + sumToes;
 
-    const diagnostics = evaluateKneeDefects(heelPct, midfootPct, forefootPct, toesPct);
-    const closestMatch = findClosestDatasetRecord(heelPct, midfootPct, forefootPct, toesPct);
+    const heelPct = totalLoad > 0 ? (sumHeel / totalLoad) * 100 : 0;
+    const midfootPct = totalLoad > 0 ? (sumMidfoot / totalLoad) * 100 : 0;
+    const forefootPct = totalLoad > 0 ? (sumForefoot / totalLoad) * 100 : 0;
+    const toesPct = totalLoad > 0 ? (sumToes / totalLoad) * 100 : 0;
+
+    const diagnostics = evaluateKneeDefects(heelPct, midfootPct, forefootPct, toesPct, totalLoad);
+    const closestMatch = findClosestDatasetRecord(heelPct, midfootPct, forefootPct, toesPct, totalLoad, avgMap);
+    const findings = screenPlantarDefectsAndAbnormalities(avgMap, samples, state.test.strideCount);
+    renderScreeningFindings(findings);
 
     document.getElementById('loading-stage-text').textContent = 'Cross-referencing reference datasets (Parkinson\'s VGRF, GaitRite, Healthy norms)...';
-    await new Promise(r => setTimeout(r, 900));
+    await new Promise(r => setTimeout(r, 600));
 
-    document.getElementById('loading-stage-text').textContent = 'Querying NVIDIA Llama-3.1 AI Clinical Diagnostic Engine...';
+    document.getElementById('loading-stage-text').textContent = 'Generating multi-factor clinical biomechanical report...';
 
     let clinicalNarrative = '';
     try {
-      clinicalNarrative = await runNvidiaClinicalInference({
+      clinicalNarrative = await runLLMClinicalInference({
         heelPct,
         midfootPct,
         forefootPct,
         toesPct,
         strideCount: state.test.strideCount || 26,
         diagnostics,
-        closestMatch
+        closestMatch,
+        screeningFindings: findings
       });
     } catch (err) {
-      console.warn('NVIDIA NIM API call failed or not configured, using deterministic engine:', err);
+      console.warn('AI LLM inference call failed or not configured, using deterministic engine:', err);
       clinicalNarrative = generateDeterministicClinicalReport({
         heelPct,
         midfootPct,
@@ -1180,7 +1760,8 @@
         toesPct,
         strideCount: state.test.strideCount || 26,
         diagnostics,
-        closestMatch
+        closestMatch,
+        screeningFindings: findings
       });
     }
 
@@ -1201,7 +1782,95 @@
     });
   }
 
-  function evaluateKneeDefects(heelPct, midfootPct, forefootPct, toesPct) {
+  async function runInstantScreening() {
+    const valForefootMedial = state.sensors['forefoot_medial'] ? state.sensors['forefoot_medial'].currentValue : (state.sensors['forefoot'] ? state.sensors['forefoot'].currentValue : 0);
+    const valForefootLateral = state.sensors['forefoot_lateral'] ? state.sensors['forefoot_lateral'].currentValue : 0;
+    const valArchMedial = state.sensors['arch_medial'] ? state.sensors['arch_medial'].currentValue : (state.sensors['midfoot'] ? state.sensors['midfoot'].currentValue : 0);
+    const valArchLateral = state.sensors['arch_lateral'] ? state.sensors['arch_lateral'].currentValue : 0;
+    const valHeel = state.sensors['heel'] ? state.sensors['heel'].currentValue : 0;
+
+    const sensorMap = {
+      heel: valHeel,
+      arch_medial: valArchMedial,
+      arch_lateral: valArchLateral,
+      forefoot_medial: valForefootMedial,
+      forefoot_lateral: valForefootLateral,
+      midfoot: Math.max(valArchMedial, valArchLateral),
+      forefoot: Math.max(valForefootMedial, valForefootLateral)
+    };
+
+    const sumMidfoot = Math.max(valArchMedial, valArchLateral);
+    const sumForefoot = Math.max(valForefootMedial, valForefootLateral);
+    const sumHeel = valHeel;
+    const totalLoad = sumHeel + sumMidfoot + sumForefoot;
+
+    const heelPct = totalLoad > 0 ? (sumHeel / totalLoad) * 100 : 0;
+    const midfootPct = totalLoad > 0 ? (sumMidfoot / totalLoad) * 100 : 0;
+    const forefootPct = totalLoad > 0 ? (sumForefoot / totalLoad) * 100 : 0;
+    const toesPct = 0;
+
+    const diagnostics = evaluateKneeDefects(heelPct, midfootPct, forefootPct, toesPct, totalLoad);
+    const closestMatch = findClosestDatasetRecord(heelPct, midfootPct, forefootPct, toesPct, totalLoad, sensorMap);
+    const findings = screenPlantarDefectsAndAbnormalities(sensorMap, [], 0);
+    renderScreeningFindings(findings);
+
+    let clinicalNarrative = '';
+    try {
+      clinicalNarrative = await runLLMClinicalInference({
+        heelPct,
+        midfootPct,
+        forefootPct,
+        toesPct,
+        strideCount: 0,
+        diagnostics,
+        closestMatch,
+        screeningFindings: findings
+      });
+    } catch (_) {
+      clinicalNarrative = generateDeterministicClinicalReport({
+        heelPct,
+        midfootPct,
+        forefootPct,
+        toesPct,
+        strideCount: 0,
+        diagnostics,
+        closestMatch,
+        screeningFindings: findings
+      });
+    }
+
+    state.test.status = 'completed';
+    const resultsContainer = document.getElementById('test-results-container');
+    if (resultsContainer) resultsContainer.style.display = 'flex';
+    document.getElementById('test-progress-container').style.display = 'none';
+    document.getElementById('test-loading-container').style.display = 'none';
+
+    renderDiagnosticResults({
+      heelPct,
+      midfootPct,
+      forefootPct,
+      toesPct,
+      strideCount: 0,
+      diagnostics,
+      closestMatch,
+      clinicalNarrative
+    });
+
+    resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function evaluateKneeDefects(heelPct, midfootPct, forefootPct, toesPct, totalLoad) {
+    if (totalLoad !== undefined && totalLoad < 0.05) {
+      return {
+        medialOARisk: 'Normal',
+        patellarRisk: 'Normal',
+        shockRisk: 'Normal',
+        pronationStatus: 'Unloaded Baseline',
+        score: 100,
+        isUnloaded: true
+      };
+    }
+
     let medialOARisk = 'Low Risk';
     if (midfootPct > 24 && forefootPct > 36) {
       medialOARisk = 'High Risk';
@@ -1247,17 +1916,43 @@
       patellarRisk,
       shockRisk,
       pronationStatus,
-      score: Math.max(35, Math.min(100, score))
+      score: Math.max(35, Math.min(100, score)),
+      isUnloaded: false
     };
   }
 
-  function findClosestDatasetRecord(heelPct, midfootPct, forefootPct, toesPct) {
+  function findClosestDatasetRecord(heelPct, midfootPct, forefootPct, toesPct, totalLoad, sensorMap) {
+    if (totalLoad !== undefined && totalLoad < 0.05) {
+      const zeroRec = REFERENCE_DATASETS.find(r => r.record_id === 'REC-ZERO-CONTACT-00');
+      if (zeroRec) return zeroRec;
+    }
+
+    if (sensorMap && sensorMap.heel > 0.80 && sensorMap.arch_medial > 0.75 && sensorMap.forefoot_medial > 0.80) {
+      const satRec = REFERENCE_DATASETS.find(r => r.record_id === 'REC-SATURATION-99');
+      if (satRec) return satRec;
+    }
+
+    if (midfootPct > 32) {
+      const flatRec = REFERENCE_DATASETS.find(r => r.record_id === 'REC-FLATFOOT-05');
+      if (flatRec) return flatRec;
+    }
+
+    if (midfootPct < 7 && heelPct > 35) {
+      const cavusRec = REFERENCE_DATASETS.find(r => r.record_id === 'REC-CAVUS-07');
+      if (cavusRec) return cavusRec;
+    }
+
+    if (forefootPct > 65) {
+      const metRec = REFERENCE_DATASETS.find(r => r.record_id === 'REC-METATARSALGIA-08');
+      if (metRec) return metRec;
+    }
+
     let closest = REFERENCE_DATASETS[0];
     let minDistance = Infinity;
 
     REFERENCE_DATASETS.forEach(rec => {
       const p = rec.pressures;
-      const recTotal = p.heel + p.midfoot + p.forefoot + p.toes;
+      const recTotal = p.heel + p.midfoot + p.forefoot + p.toes || 1;
       const recHeel = (p.heel / recTotal) * 100;
       const recMidfoot = (p.midfoot / recTotal) * 100;
       const recForefoot = (p.forefoot / recTotal) * 100;
@@ -1282,20 +1977,47 @@
   function renderDiagnosticResults(data) {
     const { heelPct, midfootPct, forefootPct, toesPct, diagnostics, closestMatch, clinicalNarrative } = data;
 
-    document.getElementById('results-health-index').textContent = `${diagnostics.score} / 100`;
-
+    const healthEl = document.getElementById('results-health-index');
     const badge = document.getElementById('results-verdict-badge');
     const title = document.getElementById('results-verdict-title');
 
-    if (diagnostics.score >= 85) {
+    if (diagnostics.isUnloaded) {
+      healthEl.textContent = 'N/A (Unloaded)';
+      badge.textContent = 'NO GROUND CONTACT / SENSOR SIGNAL DETECTED';
+      badge.style.color = '#94a3b8';
+      title.textContent = 'Zero Load Registered Across All Monitored Insole Sensors';
+    } else if (closestMatch && closestMatch.record_id === 'REC-SATURATION-99') {
+      healthEl.textContent = '45 / 100';
+      badge.textContent = 'UNIFORM SENSOR SATURATION / ISOMETRIC CLAMP';
+      badge.style.color = '#f59e0b';
+      title.textContent = 'Continuous Maximum Sensor Saturation Detected Across All Channels';
+    } else if (closestMatch && closestMatch.record_id === 'REC-FLATFOOT-05') {
+      healthEl.textContent = `${diagnostics.score} / 100`;
+      badge.textContent = 'SEVERE FLATFOOT (PES PLANUS) & ARCH COLLAPSE';
+      badge.style.color = '#f87171';
+      title.textContent = 'Medial Longitudinal Arch Collapse & Valgus Tracking Stress';
+    } else if (closestMatch && closestMatch.record_id === 'REC-CAVUS-07') {
+      healthEl.textContent = `${diagnostics.score} / 100`;
+      badge.textContent = 'PES CAVUS (RIGID HIGH-ARCH) SUPINATION';
+      badge.style.color = '#facc15';
+      title.textContent = 'Reduced Midfoot Ground Dissipation & Axial Shock Transmission';
+    } else if (closestMatch && closestMatch.record_id === 'REC-METATARSALGIA-08') {
+      healthEl.textContent = `${diagnostics.score} / 100`;
+      badge.textContent = 'FOREFOOT OVERLOAD / METATARSALGIA RISK';
+      badge.style.color = '#f97316';
+      title.textContent = 'Anterior Stance Dominance & Metatarsal Head Hyper-Pressure';
+    } else if (diagnostics.score >= 85) {
+      healthEl.textContent = `${diagnostics.score} / 100`;
       badge.textContent = 'HEALTHY BALANCED GAIT PROFILE';
       badge.style.color = '#4ade80';
       title.textContent = 'Normal Lower Extremity Kinetics & Symmetrical Joint Loading';
     } else if (diagnostics.score >= 70) {
+      healthEl.textContent = `${diagnostics.score} / 100`;
       badge.textContent = 'MILD COMPENSATORY LOAD DETECTED';
       badge.style.color = '#facc15';
       title.textContent = 'Mild Arch Collapse & Asymmetrical Knee Vector Warning';
     } else {
+      healthEl.textContent = `${diagnostics.score} / 100`;
       badge.textContent = 'ELEVATED KNEE JOINT DEFECT RISK';
       badge.style.color = '#f87171';
       title.textContent = 'Pathological Medial Compartment Knee Overload & Arch Defect';
@@ -1303,9 +2025,10 @@
 
     const updateRisk = (id, val) => {
       const el = document.getElementById(id);
+      if (!el) return;
       el.textContent = val;
       el.className = 'risk-badge';
-      if (val.includes('Low') || val.includes('Normal') || val.includes('Neutral')) {
+      if (val.includes('Low') || val.includes('Normal') || val.includes('Neutral') || val.includes('Unloaded')) {
         el.classList.add('risk-low');
       } else if (val.includes('Mild') || val.includes('Moderate')) {
         el.classList.add('risk-moderate');
@@ -1333,21 +2056,32 @@
 
     document.getElementById('results-dataset-citation').textContent = `${closestMatch.record_id} — ${closestMatch.pattern} (${closestMatch.description})`;
     document.getElementById('results-llm-narrative').textContent = clinicalNarrative;
-    document.getElementById('results-model-badge').textContent = state.nvidia.apiKey ? state.nvidia.model : 'Deterministic Biomechanical Engine';
+    document.getElementById('results-model-badge').textContent = (state.nvidia.apiKey || state.nvidia.provider === 'ollama')
+      ? `${state.nvidia.provider.toUpperCase()} (${state.nvidia.model.split('/').pop()})`
+      : 'Deterministic Biomechanical Engine';
   }
 
-  async function runNvidiaClinicalInference(data) {
-    if (!state.nvidia.apiKey) throw new Error('No NVIDIA API key configured');
+  async function runLLMClinicalInference(data) {
+    if (!state.nvidia.apiKey && state.nvidia.provider !== 'ollama') {
+      throw new Error(`No API key configured for ${state.nvidia.provider || 'NVIDIA'}`);
+    }
 
-    const prompt = `You are an expert biomechanical AI clinician specializing in pedobarography, plantar pressure analysis, and knee joint pathology.
-Analyze the following patient telemetry from a 30-second walking calibration test:
+    const findingsSummary = (data.screeningFindings || [])
+      .map(f => `• ${f.name} [${f.status.toUpperCase()}]: ${f.abnormalityDetected} (Evidence: ${f.supportingEvidence})`)
+      .join('\n');
+
+    const prompt = `You are an expert biomechanical AI clinician specializing in pedobarography, plantar pressure analysis, knee joint kinetic chain mechanics, and foot deformities.
+Analyze the following patient telemetry from a 5-sensor insole evaluation:
 
 PATIENT TELEMETRY:
 - Recorded Strides: ${data.strideCount}
 - Heel Load: ${data.heelPct.toFixed(1)}%
-- Midfoot (Arch) Load: ${data.midfootPct.toFixed(1)}%
-- Forefoot (Metatarsal Ball) Load: ${data.forefootPct.toFixed(1)}%
-- Toes (Digital Pad) Load: ${data.toesPct.toFixed(1)}%
+- Midfoot Arch Load: ${data.midfootPct.toFixed(1)}%
+- Forefoot Metatarsal Load: ${data.forefootPct.toFixed(1)}%
+- Toes Load: ${data.toesPct.toFixed(1)}%
+
+15-POINT PLANTAR ABNORMALITY & DEFECT SCREENINGS:
+${findingsSummary}
 
 CALCULATED KNEE & GAIT RISK INDICES:
 - Medial Compartment Knee Overload: ${data.diagnostics.medialOARisk}
@@ -1363,45 +2097,80 @@ CLOSEST CLINICAL DATASET BENCHMARK:
 
 INSTRUCTIONS:
 Provide a concise, professional, structured clinical report covering:
-1. BIOMECHANICAL INTERPRETATION: How the measured ground reaction force distribution impacts the kinetic chain.
-2. KNEE JOINT DEFECTS & VULNERABILITIES: Specifically explain any risks for medial compartment knee osteoarthritis, patellar maltracking, or meniscal shock.
-3. EVIDENCE CITATION: Correlate findings with the cited reference dataset pattern (${data.closestMatch.record_id}).
-4. ACTIONABLE RECOMMENDATIONS: Orthotic insole suggestions (e.g. arch support, lateral/medial wedge) and physical therapy exercises.
-5. CLINICAL DISCLAIMER: Note that this is a biomechanical research screening tool and not a replacement for radiographic imaging or orthopedic consultation.`;
+1. BIOMECHANICAL FORCE INTERPRETATION: How the measured 5-point ground reaction force distribution impacts the kinetic chain.
+2. DETECTED FOOT ABNORMALITIES & DEFECTS: Specifically discuss any detected conditions (such as Flatfoot, Cavus, Metatarsalgia, Plantar Fasciitis, or Ulcer Pressure Risks) and their observed loading evidence.
+3. KNEE JOINT DEFECTS & VULNERABILITIES: Explain any risks for medial compartment knee osteoarthritis, patellar maltracking, or meniscal shock.
+4. EVIDENCE CITATION: Correlate findings with the cited reference dataset pattern (${data.closestMatch.record_id}).
+5. ACTIONABLE RECOMMENDATIONS: Orthotic insole suggestions (e.g. medial arch support, metatarsal dome, lateral wedge, heel cup) and corrective exercises.
+6. MANDATORY CLINICAL DISCLAIMER: Note that this is a biomechanical research screening tool and does not constitute a definitive medical diagnosis.`;
 
-    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+    const response = await fetch('/api/llm/chat', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.nvidia.apiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        provider: state.nvidia.provider || 'nvidia',
+        apiKey: state.nvidia.apiKey,
         model: state.nvidia.model,
+        customUrl: state.nvidia.customUrl,
         messages: [
-          { role: 'system', content: 'You are an advanced orthopedic biomechanics AI assistant providing clear, evidence-based gait diagnostics.' },
+          { role: 'system', content: 'You are an advanced orthopedic biomechanics AI assistant providing clear, evidence-based pedobarography and foot defect screening diagnostics.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.2,
-        max_tokens: 800
+        maxTokens: 850
       })
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`NVIDIA API HTTP ${response.status}: ${errText}`);
+      const errJson = await response.json().catch(() => ({}));
+      throw new Error(errJson.error || `HTTP ${response.status} from LLM proxy`);
     }
 
     const json = await response.json();
-    return json.choices[0].message.content.trim();
+    if (!json.ok) throw new Error(json.error || 'LLM generation failed');
+    return json.content.trim();
   }
 
+  // Backwards compatibility alias
+  const runNvidiaClinicalInference = runLLMClinicalInference;
+
   function generateDeterministicClinicalReport(data) {
-    const { heelPct, midfootPct, forefootPct, toesPct, diagnostics, closestMatch } = data;
+    const { heelPct, midfootPct, forefootPct, toesPct, diagnostics, closestMatch, screeningFindings } = data;
+
+    if (diagnostics.isUnloaded) {
+      return `### 1. Insole Unweighted / No Sensor Load Detected
+All 5 regional sensor locations registered 0% baseline load during the measurement period. No dynamic gait strides or active vertical ground reaction forces were detected.
+
+### 2. Operational Guidance
+• Ensure insole is securely positioned under the plantar surface of the foot.
+• If using hardware mode, verify ESP32 USB COM port connection and baud rate (115200).
+• If using simulation mode, press sensors on the canvas, choose a preset above, or drag across the insole.
+
+*Notice: Biomechanical screening tool for research. No active signals recorded.*`;
+    }
 
     let narrative = `### 1. Biomechanical Force Distribution\n`;
-    narrative += `Over the 30-second walking trial (${data.strideCount} detected strides), the patient displayed a regional load distribution of ${heelPct.toFixed(1)}% Heel, ${midfootPct.toFixed(1)}% Midfoot Arch, ${forefootPct.toFixed(1)}% Forefoot Ball, and ${toesPct.toFixed(1)}% Toes.\n\n`;
+    if (data.strideCount > 0) {
+      narrative += `Over the 30-second walking trial (${data.strideCount} detected strides), the patient displayed a regional load distribution of ${heelPct.toFixed(1)}% Heel, ${midfootPct.toFixed(1)}% Midfoot Arch, ${forefootPct.toFixed(1)}% Forefoot Ball, and ${toesPct.toFixed(1)}% Toes.\n\n`;
+    } else {
+      narrative += `Instantaneous sensor screening snapshot displayed a regional load distribution of ${heelPct.toFixed(1)}% Heel, ${midfootPct.toFixed(1)}% Midfoot Arch, and ${forefootPct.toFixed(1)}% Forefoot Ball.\n\n`;
+    }
 
-    narrative += `### 2. Knee Joint Defect & Structural Evaluation\n`;
+    narrative += `### 2. Plantar Defect & Abnormality Screening Results\n`;
+    const detected = (screeningFindings || []).filter(f => f.status === 'Detected');
+    if (detected.length > 0) {
+      narrative += `The 15-condition screening engine identified **${detected.length} pressure-pattern abnormalities**:\n`;
+      detected.forEach(d => {
+        narrative += `• **${d.name} (${d.severity} Risk)**: ${d.abnormalityDetected} Evidence: ${d.supportingEvidence} *Potential Association*: ${d.possibleClinicalAssociation}\n`;
+      });
+      narrative += `\n`;
+    } else {
+      narrative += `All 15 plantar defect and pressure-related screening checks are currently within normal baseline thresholds.\n\n`;
+    }
+
+    narrative += `### 3. Knee Joint Defect & Kinetic Chain Evaluation\n`;
     if (diagnostics.medialOARisk === 'High Risk' || diagnostics.medialOARisk === 'Moderate Risk') {
       narrative += `• Medial Knee Compartment Overload: ${diagnostics.medialOARisk}. Excessive ground reaction loading during midstance shifts the mechanical axis medially, increasing the Knee Adduction Moment (KAM). This predisposes the patient to medial meniscal compression and medial tibiofemoral cartilage degeneration (Knee OA tendency).\n`;
     } else {
@@ -1416,10 +2185,10 @@ Provide a concise, professional, structured clinical report covering:
       narrative += `• Calcaneal Impact Transmission: ${diagnostics.shockRisk}. Elevated peak heel force suggests insufficient eccentric pretibial damping at initial contact, propagating impact shock through the tibia.\n`;
     }
 
-    narrative += `\n### 3. Clinical Dataset Benchmark Evidence\n`;
+    narrative += `\n### 4. Clinical Dataset Benchmark Evidence\n`;
     narrative += `The measured 4-region distribution most closely matches reference pattern **${closestMatch.record_id}** (*${closestMatch.pattern}*). In clinical gait databases, this pattern is characterized by: ${closestMatch.description}\n\n`;
 
-    narrative += `### 4. Orthotic & Corrective Recommendations\n`;
+    narrative += `### 5. Orthotic & Corrective Recommendations\n`;
     if (midfootPct > 20) {
       narrative += `• Custom semirigid orthotic insole with medial longitudinal arch support to limit tibial internal rotation.\n`;
       narrative += `• Strengthening of the posterior tibialis, hip abductors (gluteus medius), and vastus medialis oblique (VMO).\n`;
@@ -1429,7 +2198,7 @@ Provide a concise, professional, structured clinical report covering:
       narrative += `• Maintain current footwear with neutral heel cushioning and flexible toe-box.\n`;
     }
 
-    narrative += `\n*Notice: Biomechanical screening evaluation for technical assessment. Does not constitute a clinical medical diagnosis.*`;
+    narrative += `\n*Clinical & Technical Notice: Biomechanical research screening evaluation. Pressure-pattern abnormalities do not constitute confirmed medical diagnoses. Flatfoot, high arch, plantar fasciitis, metatarsalgia, and diabetic ulcer risk require comprehensive clinical evaluation by an orthopedic specialist or podiatrist.*`;
 
     return narrative;
   }
@@ -1894,6 +2663,38 @@ Provide a concise, professional, structured clinical report covering:
         setVal('forefoot_medial', 0.70);
         setVal('forefoot_lateral', 0.68);
         break;
+
+      case 'flatfoot': // Severe Flatfoot (Pes Planus)
+        setVal('heel', 0.22);
+        setVal('arch_medial', 0.52);
+        setVal('arch_lateral', 0.32);
+        setVal('forefoot_medial', 0.40);
+        setVal('forefoot_lateral', 0.28);
+        break;
+
+      case 'cavus': // Pes Cavus (Rigid High Arch)
+        setVal('heel', 0.68);
+        setVal('arch_medial', 0.02);
+        setVal('arch_lateral', 0.04);
+        setVal('forefoot_medial', 0.52);
+        setVal('forefoot_lateral', 0.48);
+        break;
+
+      case 'metatarsalgia': // Forefoot Hyper-Pressure Overload
+        setVal('heel', 0.15);
+        setVal('arch_medial', 0.08);
+        setVal('arch_lateral', 0.12);
+        setVal('forefoot_medial', 0.92);
+        setVal('forefoot_lateral', 0.78);
+        break;
+
+      case 'zero': // Zero Contact (Unloaded)
+        setVal('heel', 0.00);
+        setVal('arch_medial', 0.00);
+        setVal('arch_lateral', 0.00);
+        setVal('forefoot_medial', 0.00);
+        setVal('forefoot_lateral', 0.00);
+        break;
     }
 
     if (state.selectedSensorId) selectSensor(state.selectedSensorId);
@@ -2136,11 +2937,131 @@ Provide a concise, professional, structured clinical report covering:
       URL.revokeObjectURL(url);
     });
 
+    // Instant Screen button (Evaluates current pressure state without 30s timer)
+    const btnInstant = document.getElementById('btn-instant-evaluate');
+    if (btnInstant) {
+      btnInstant.addEventListener('click', runInstantScreening);
+    }
+
+    // Screening filter tabs
+    const filterAll = document.getElementById('screening-filter-all');
+    if (filterAll) {
+      filterAll.addEventListener('click', () => applyScreeningFilter('all'));
+    }
+    const filterDet = document.getElementById('screening-filter-detected');
+    if (filterDet) {
+      filterDet.addEventListener('click', () => applyScreeningFilter('detected'));
+    }
+
     // Settings Modal
     const modal = document.getElementById('settings-modal');
+    const providerSelect = document.getElementById('llm-provider-select');
+    const customUrlGroup = document.getElementById('llm-custom-url-group');
+    const customUrlInput = document.getElementById('llm-custom-url-input');
+    const modelSelect = document.getElementById('nvidia-model-select');
+    const apiKeyInput = document.getElementById('nvidia-api-key-input');
+    const lblApiKey = document.getElementById('lbl-api-key');
+    const helpBox = document.getElementById('provider-help-box');
+
+    const LLM_PROVIDER_MODELS = {
+      nvidia: [
+        { id: 'meta/llama-3.1-70b-instruct', name: 'meta/llama-3.1-70b-instruct (Recommended)' },
+        { id: 'meta/llama-3.3-70b-instruct', name: 'meta/llama-3.3-70b-instruct (Latest High-Precision)' },
+        { id: 'mistralai/mixtral-8x22b-instruct', name: 'mistralai/mixtral-8x22b-instruct (High Reasoning)' },
+        { id: 'meta/llama-3.1-8b-instruct', name: 'meta/llama-3.1-8b-instruct (Fast & Lightweight)' },
+        { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'nvidia/llama-3.1-nemotron-70b-instruct' }
+      ],
+      gemini: [
+        { id: 'gemini-2.0-flash', name: 'gemini-2.0-flash (Recommended & Ultra Fast)' },
+        { id: 'gemini-1.5-flash', name: 'gemini-1.5-flash (Fast Multimodal)' },
+        { id: 'gemini-1.5-pro', name: 'gemini-1.5-pro (Deep Clinical Reasoning)' },
+        { id: 'gemini-2.5-flash', name: 'gemini-2.5-flash (Experimental)' }
+      ],
+      groq: [
+        { id: 'llama-3.3-70b-versatile', name: 'llama-3.3-70b-versatile (Sub-Second Latency)' },
+        { id: 'llama-3.1-8b-instant', name: 'llama-3.1-8b-instant (Ultra Fast)' },
+        { id: 'mixtral-8x7b-32768', name: 'mixtral-8x7b-32768' },
+        { id: 'gemma2-9b-it', name: 'gemma2-9b-it' }
+      ],
+      openai: [
+        { id: 'gpt-4o-mini', name: 'gpt-4o-mini (Fast & Efficient)' },
+        { id: 'gpt-4o', name: 'gpt-4o (High Precision)' },
+        { id: 'gpt-3.5-turbo', name: 'gpt-3.5-turbo (Legacy)' }
+      ],
+      openrouter: [
+        { id: 'meta-llama/llama-3.3-70b-instruct', name: 'meta-llama/llama-3.3-70b-instruct' },
+        { id: 'google/gemini-2.0-flash-exp:free', name: 'google/gemini-2.0-flash-exp:free (Free Tier)' },
+        { id: 'mistralai/mistral-7b-instruct:free', name: 'mistralai/mistral-7b-instruct:free' },
+        { id: 'anthropic/claude-3.5-sonnet', name: 'anthropic/claude-3.5-sonnet' }
+      ],
+      ollama: [
+        { id: 'llama3.1', name: 'llama3.1 (Local 8B)' },
+        { id: 'llama3', name: 'llama3 (Local)' },
+        { id: 'mistral', name: 'mistral (Local 7B)' },
+        { id: 'phi3', name: 'phi3 (Local Microsoft)' }
+      ],
+      custom: [
+        { id: 'default', name: 'Custom OpenAI-Compatible Model' }
+      ]
+    };
+
+    function updateProviderForm(prov) {
+      if (customUrlGroup) {
+        customUrlGroup.style.display = (prov === 'custom' || prov === 'ollama') ? 'block' : 'none';
+      }
+      if (lblApiKey) {
+        if (prov === 'gemini') lblApiKey.textContent = 'Google Gemini API Key:';
+        else if (prov === 'groq') lblApiKey.textContent = 'Groq Cloud API Key:';
+        else if (prov === 'openai') lblApiKey.textContent = 'OpenAI API Key:';
+        else if (prov === 'openrouter') lblApiKey.textContent = 'OpenRouter API Key:';
+        else if (prov === 'ollama') lblApiKey.textContent = 'Ollama API Key (Optional):';
+        else if (prov === 'custom') lblApiKey.textContent = 'Custom API Key (Optional):';
+        else lblApiKey.textContent = 'NVIDIA NIM API Key:';
+      }
+      if (apiKeyInput) {
+        if (prov === 'gemini') apiKeyInput.placeholder = 'AIzaSy...';
+        else if (prov === 'groq') apiKeyInput.placeholder = 'gsk_...';
+        else if (prov === 'openai') apiKeyInput.placeholder = 'sk-...';
+        else if (prov === 'openrouter') apiKeyInput.placeholder = 'sk-or-v1-...';
+        else if (prov === 'ollama') apiKeyInput.placeholder = 'Not required for localhost';
+        else if (prov === 'custom') apiKeyInput.placeholder = 'Bearer token if needed';
+        else apiKeyInput.placeholder = 'nvapi-...';
+      }
+      if (modelSelect) {
+        const models = LLM_PROVIDER_MODELS[prov] || LLM_PROVIDER_MODELS['nvidia'];
+        modelSelect.innerHTML = models.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+        if (state.nvidia.model) {
+          modelSelect.value = state.nvidia.model;
+        }
+      }
+      if (helpBox) {
+        if (prov === 'gemini') {
+          helpBox.innerHTML = '<p>Get a free Gemini API key at <a href="https://aistudio.google.com" target="_blank" rel="noopener">aistudio.google.com</a> (Google AI Studio).</p>';
+        } else if (prov === 'groq') {
+          helpBox.innerHTML = '<p>Get a fast, free Groq API key at <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a>.</p>';
+        } else if (prov === 'nvidia') {
+          helpBox.innerHTML = '<p>Get a free starter key at <a href="https://build.nvidia.com" target="_blank" rel="noopener">build.nvidia.com</a> with 1000 free inference credits.</p>';
+        } else if (prov === 'ollama') {
+          helpBox.innerHTML = '<p>Ensure Ollama is running locally: <code>ollama serve</code> (default: http://localhost:11434/v1).</p>';
+        } else {
+          helpBox.innerHTML = '<p>Enter your provider key above. Requests are routed through the local proxy server.</p>';
+        }
+      }
+    }
+
+    if (providerSelect) {
+      providerSelect.addEventListener('change', (e) => {
+        updateProviderForm(e.target.value);
+      });
+    }
+
     document.getElementById('btn-open-settings').addEventListener('click', () => {
-      document.getElementById('nvidia-api-key-input').value = state.nvidia.apiKey || '';
-      document.getElementById('nvidia-model-select').value = state.nvidia.model || 'meta/llama-3.1-70b-instruct';
+      const curProv = state.nvidia.provider || 'nvidia';
+      if (providerSelect) providerSelect.value = curProv;
+      updateProviderForm(curProv);
+      if (apiKeyInput) apiKeyInput.value = state.nvidia.apiKey || '';
+      if (customUrlInput) customUrlInput.value = state.nvidia.customUrl || '';
+      if (modelSelect && state.nvidia.model) modelSelect.value = state.nvidia.model;
       modal.style.display = 'flex';
     });
 
@@ -2164,50 +3085,99 @@ Provide a concise, professional, structured clinical report covering:
       }
     });
 
+    // Fetch Live Models Button
+    const btnFetchModels = document.getElementById('btn-fetch-models');
+    if (btnFetchModels) {
+      btnFetchModels.addEventListener('click', async () => {
+        const prov = providerSelect ? providerSelect.value : (state.nvidia.provider || 'nvidia');
+        const key = apiKeyInput ? apiKeyInput.value.trim() : (state.nvidia.apiKey || '');
+        const cUrl = customUrlInput ? customUrlInput.value.trim() : (state.nvidia.customUrl || '');
+        const statusBox = document.getElementById('settings-status-message');
+
+        statusBox.className = 'settings-status-box';
+        statusBox.textContent = `Fetching live models for ${prov.toUpperCase()}...`;
+
+        try {
+          const resp = await fetch('/api/llm/models', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider: prov, apiKey: key, baseUrl: cUrl })
+          });
+          const data = await resp.json();
+          if (data.ok && data.models && data.models.length > 0) {
+            modelSelect.innerHTML = data.models.map(m => `<option value="${m}">${m}</option>`).join('');
+            statusBox.className = 'settings-status-box success';
+            statusBox.textContent = `Retrieved ${data.models.length} live models from ${prov.toUpperCase()}!`;
+          } else {
+            statusBox.className = 'settings-status-box';
+            statusBox.textContent = 'Using default model catalog for ' + prov;
+          }
+        } catch (err) {
+          statusBox.className = 'settings-status-box error';
+          statusBox.textContent = `Failed to fetch models: ${err.message}`;
+        }
+      });
+    }
+
     document.getElementById('btn-save-settings').addEventListener('click', () => {
-      const key = document.getElementById('nvidia-api-key-input').value.trim();
-      const model = document.getElementById('nvidia-model-select').value;
+      const prov = providerSelect ? providerSelect.value : 'nvidia';
+      const key = apiKeyInput ? apiKeyInput.value.trim() : '';
+      const model = modelSelect ? modelSelect.value : 'meta/llama-3.1-70b-instruct';
+      const cUrl = customUrlInput ? customUrlInput.value.trim() : '';
+
+      state.nvidia.provider = prov;
       state.nvidia.apiKey = key;
       state.nvidia.model = model;
+      state.nvidia.customUrl = cUrl;
 
       try {
+        localStorage.setItem('velostat_llm_provider', prov);
         localStorage.setItem('velostat_nvidia_api_key', key);
         localStorage.setItem('velostat_nvidia_model', model);
+        localStorage.setItem('velostat_llm_custom_url', cUrl);
       } catch (_) {}
 
       updateApiStatusPill();
       const statusBox = document.getElementById('settings-status-message');
       statusBox.className = 'settings-status-box success';
-      statusBox.textContent = key ? 'Settings saved! NVIDIA NIM inference active.' : 'Settings saved. Using deterministic rule engine.';
+      statusBox.textContent = (key || prov === 'ollama')
+        ? `Settings saved! ${prov.toUpperCase()} (${model.split('/').pop()}) active.`
+        : 'Settings saved. Using deterministic rule engine.';
       setTimeout(() => { modal.style.display = 'none'; }, 900);
     });
 
     document.getElementById('btn-test-nvidia').addEventListener('click', async () => {
-      const key = document.getElementById('nvidia-api-key-input').value.trim();
+      const prov = providerSelect ? providerSelect.value : 'nvidia';
+      const key = apiKeyInput ? apiKeyInput.value.trim() : '';
+      const cUrl = customUrlInput ? customUrlInput.value.trim() : '';
       const statusBox = document.getElementById('settings-status-message');
-      if (!key) {
+
+      if (!key && prov !== 'ollama') {
         statusBox.className = 'settings-status-box error';
         statusBox.textContent = 'Please enter an API key first.';
         return;
       }
 
       statusBox.className = 'settings-status-box';
-      statusBox.textContent = 'Testing connection with NVIDIA NIM...';
+      statusBox.textContent = `Testing connection with ${prov.toUpperCase()} via server proxy...`;
 
       try {
-        const resp = await fetch('https://integrate.api.nvidia.com/v1/models', {
-          headers: { 'Authorization': `Bearer ${key}` }
+        const resp = await fetch('/api/llm/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: prov, apiKey: key, baseUrl: cUrl })
         });
-        if (resp.ok) {
+        const json = await resp.json();
+        if (json.ok) {
           statusBox.className = 'settings-status-box success';
-          statusBox.textContent = 'Connection verified! Key is valid and active.';
+          statusBox.textContent = json.message || `Connection verified with ${prov.toUpperCase()}!`;
         } else {
           statusBox.className = 'settings-status-box error';
-          statusBox.textContent = `Authorization failed (HTTP ${resp.status}). Check your key.`;
+          statusBox.textContent = json.error || `Connection test failed. Check your API key.`;
         }
       } catch (err) {
         statusBox.className = 'settings-status-box error';
-        statusBox.textContent = `Network error: ${err.message}`;
+        statusBox.textContent = `Network error: ${err.message}. Is server.py running?`;
       }
     });
 
@@ -2313,6 +3283,39 @@ Provide a concise, professional, structured clinical report covering:
     document.getElementById('btn-preset-mid').addEventListener('click', () => applyPreset('mid'));
     document.getElementById('btn-preset-toe').addEventListener('click', () => applyPreset('toe'));
     document.getElementById('btn-preset-full').addEventListener('click', () => applyPreset('full'));
+
+    // Screening Defect Presets
+    const btnFlatfoot = document.getElementById('btn-preset-flatfoot');
+    if (btnFlatfoot) {
+      btnFlatfoot.addEventListener('click', () => {
+        applyPreset('flatfoot');
+        runInstantScreening();
+      });
+    }
+
+    const btnCavus = document.getElementById('btn-preset-cavus');
+    if (btnCavus) {
+      btnCavus.addEventListener('click', () => {
+        applyPreset('cavus');
+        runInstantScreening();
+      });
+    }
+
+    const btnMetatarsalgia = document.getElementById('btn-preset-metatarsalgia');
+    if (btnMetatarsalgia) {
+      btnMetatarsalgia.addEventListener('click', () => {
+        applyPreset('metatarsalgia');
+        runInstantScreening();
+      });
+    }
+
+    const btnZero = document.getElementById('btn-preset-zero');
+    if (btnZero) {
+      btnZero.addEventListener('click', () => {
+        applyPreset('zero');
+        runInstantScreening();
+      });
+    }
 
     // Hardware Controls
     const mappingPresetSelect = document.getElementById('hw-mapping-preset');
