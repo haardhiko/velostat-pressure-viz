@@ -1,8 +1,8 @@
 /**
- * Velostat Plantar Pressure Map & Biomechanical Analysis — Core Logic
- * 5 Regional Sensors (2 Toes with wide separation, Forefoot, Midfoot, Heel),
+ * SoleSync · Smart Plantar Insole & Foot Defect Screening — Core Logic
+ * 5 Regional Sensors (2 Forefoot Balls, 2 Midfoot Arch, 1 Heel),
  * Tactile Drag & Auto-Reset Interaction, 30-Second Walking Gait Calibration,
- * Clinical Reference Datasets Comparison, and NVIDIA NIM AI Integration.
+ * 15-Point Clinical Defect Screening, Executive Action Plan, and Multi-LLM AI Integration.
  */
 (function () {
   'use strict';
@@ -12,15 +12,15 @@
    * ========================================================================== */
 
   /**
-   * 5 Anatomical sensor locations:
-   * 1. Medial Forefoot: 1st Metatarsal head / ball
-   * 2. Lateral Forefoot: 5th Metatarsal head / ball
+   * SoleSync 5 Anatomical Sensor Locations (Left Foot Plantar View):
+   * 1. Medial Forefoot: 1st Metatarsal head / ball (inner ball)
+   * 2. Lateral Forefoot: 5th Metatarsal head / ball (outer ball)
    * 3. Medial Arch: Plantar instep (inner arch)
    * 4. Lateral Arch: Outer midfoot (lateral longitudinal arch)
    * 5. Heel: Calcaneus rearfoot cup
    *
    * Normalized coordinates (x: 0..1, y: 0..1) relative to foot bounding box:
-   * x=0 is medial (big toe side on right plantar view), x=1 is lateral (pinky side)
+   * x=0 is medial (big toe side on left plantar view), x=1 is lateral (pinky side)
    * y=0 is distal (toes), y=1 is proximal (heel)
    */
   const SENSOR_LOCATIONS = [
@@ -1357,7 +1357,7 @@
         category: 'Bilateral / Temporal Stance',
         status: isDetected ? 'Detected' : (isUnloaded ? 'Unloaded' : 'Normal'),
         severity: severity,
-        observedReadings: `Insole Mode: Single-Foot Monitoring | Stance Phase Duty Cycle: ${(stanceDuty * 100).toFixed(0)}% (Ref: 58-64%)`,
+        observedReadings: `Insole Mode: Single-Foot Monitoring (Left Foot) | Stance Phase Duty Cycle: ${(stanceDuty * 100).toFixed(0)}% (Ref: 58-64%)`,
         abnormalityDetected: isDetected
           ? `Unilateral stance time asymmetry (${stanceDuty > 0.78 ? 'Prolonged stance / dragging' : 'Shortened stance / antalgic limp'}).`
           : (isUnloaded ? 'Unloaded.' : 'Temporal stance and swing phase symmetry within expected physiological window.'),
