@@ -130,8 +130,25 @@
   ];
 
   /* ==========================================================================
-   * 3. State Management
+   * 3. State Management & Hardware Pin Mapping
    * ========================================================================== */
+
+  const HARDWARE_MAPPING_PRESETS = {
+    'toe_to_heel': {
+      1: 'toe_medial',
+      2: 'toe_lateral',
+      3: 'forefoot',
+      4: 'midfoot',
+      5: 'heel'
+    },
+    'heel_to_toe': {
+      1: 'heel',
+      2: 'midfoot',
+      3: 'forefoot',
+      4: 'toe_lateral',
+      5: 'toe_medial'
+    }
+  };
 
   const state = {
     mode: 'simulation', // 'simulation' | 'hardware'
@@ -141,8 +158,10 @@
     // Per-sensor dynamic values
     sensors: {},
 
-    // Hardware connection state
-    hwMappedSensorId: 'heel', // Physical ESP32 GPIO32 reading maps here
+    // Hardware connection state & 5-Point GPIO Pin Mapping
+    hwMappedSensorId: 'heel', // Physical single-channel fallback
+    hardwareMappingPreset: 'toe_to_heel',
+    hardwareMapping: { ...HARDWARE_MAPPING_PRESETS['toe_to_heel'] },
     hwConnected: false,
     rawADC: 0,
     lastSerialTimestamp: 0,
@@ -185,13 +204,69 @@
   };
 
   /**
-   * Sensor alias resolution helper
+   * Map Arduino Point index (1..5) or GPIO pin (32..36) to regional sensor ID
+   */
+  function mapHardwarePointToSensor(pointIdx, gpioPin) {
+    if (pointIdx && state.hardwareMapping && state.hardwareMapping[pointIdx]) {
+      return state.hardwareMapping[pointIdx];
+    }
+    if (gpioPin) {
+      const derived = gpioPin - 31;
+      if (state.hardwareMapping && state.hardwareMapping[derived]) {
+        return state.hardwareMapping[derived];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Sensor alias & hardware point resolution helper
    */
   function resolveSensorId(id) {
     if (!id || typeof id !== 'string') return null;
     const clean = id.trim().toLowerCase();
     if (state.sensors && state.sensors[clean]) return clean;
+
+    // Check for "Point N", "GPIO N", or "Point N (GPIO M)"
+    const m = clean.match(/^(?:point\s*(\d+)(?:\s*\((?:gpio\s*)?(\d+)\))?|(?:gpio\s*)(\d+))/i);
+    if (m) {
+      const pt = m[1] ? parseInt(m[1], 10) : null;
+      const gpio = m[2] ? parseInt(m[2], 10) : (m[3] ? parseInt(m[3], 10) : null);
+      const mapped = mapHardwarePointToSensor(pt, gpio);
+      if (mapped) return mapped;
+    }
+
     const aliases = {
+      'point 1': state.hardwareMapping ? state.hardwareMapping[1] : 'toe_medial',
+      'point 2': state.hardwareMapping ? state.hardwareMapping[2] : 'toe_lateral',
+      'point 3': state.hardwareMapping ? state.hardwareMapping[3] : 'forefoot',
+      'point 4': state.hardwareMapping ? state.hardwareMapping[4] : 'midfoot',
+      'point 5': state.hardwareMapping ? state.hardwareMapping[5] : 'heel',
+      'point_1': 'toe_medial',
+      'point_2': 'toe_lateral',
+      'point_3': 'forefoot',
+      'point_4': 'midfoot',
+      'point_5': 'heel',
+      'p1': 'toe_medial',
+      'p2': 'toe_lateral',
+      'p3': 'forefoot',
+      'p4': 'midfoot',
+      'p5': 'heel',
+      'gpio 32': 'toe_medial',
+      'gpio 33': 'toe_lateral',
+      'gpio 34': 'forefoot',
+      'gpio 35': 'midfoot',
+      'gpio 36': 'heel',
+      'gpio32': 'toe_medial',
+      'gpio33': 'toe_lateral',
+      'gpio34': 'forefoot',
+      'gpio35': 'midfoot',
+      'gpio36': 'heel',
+      '32': 'toe_medial',
+      '33': 'toe_lateral',
+      '34': 'forefoot',
+      '35': 'midfoot',
+      '36': 'heel',
       'toes': 'toe_medial',
       'toe': 'toe_medial',
       'toe_1': 'toe_medial',
@@ -248,6 +323,10 @@
         const resolved = resolveSensorId(parsed.hwMappedSensorId);
         if (resolved && state.sensors[resolved]) state.hwMappedSensorId = resolved;
       }
+      if (parsed.hardwareMappingPreset && HARDWARE_MAPPING_PRESETS[parsed.hardwareMappingPreset]) {
+        state.hardwareMappingPreset = parsed.hardwareMappingPreset;
+        state.hardwareMapping = { ...HARDWARE_MAPPING_PRESETS[parsed.hardwareMappingPreset] };
+      }
     }
 
     const savedKey = localStorage.getItem('velostat_nvidia_api_key');
@@ -263,7 +342,8 @@
         calibMin: state.calibMin,
         calibMax: state.calibMax,
         invertADC: state.invertADC,
-        hwMappedSensorId: state.hwMappedSensorId
+        hwMappedSensorId: state.hwMappedSensorId,
+        hardwareMappingPreset: state.hardwareMappingPreset
       }));
     } catch (_) {}
   }
@@ -660,6 +740,30 @@
    * 6. Web Serial API Adapter (ESP32 USB Communication)
    * ========================================================================== */
 
+  let serialMonitorLines = [];
+  let pulseDotTimeout = null;
+
+  function appendSerialMonitorLog(line) {
+    const term = document.getElementById('serial-terminal-log');
+    const dot = document.getElementById('serial-rx-dot');
+    if (!term) return;
+
+    if (dot) {
+      dot.classList.add('pulse');
+      clearTimeout(pulseDotTimeout);
+      pulseDotTimeout = setTimeout(() => {
+        dot.classList.remove('pulse');
+      }, 100);
+    }
+
+    serialMonitorLines.push(line);
+    if (serialMonitorLines.length > 8) {
+      serialMonitorLines.shift();
+    }
+    term.textContent = serialMonitorLines.join('\n');
+    term.scrollTop = term.scrollHeight;
+  }
+
   class SerialAdapter {
     constructor(onLineReceived, onStatusChanged) {
       this.onLineReceived = onLineReceived;
@@ -751,7 +855,32 @@
       state.lastSerialTimestamp = performance.now();
       state.serialTimestamps.push(state.lastSerialTimestamp);
 
-      // Key-Value pairs (Format C, e.g. "heel:2450,toe_medial:1200")
+      // Append raw line to serial terminal in UI
+      appendSerialMonitorLog(line);
+
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('---') || trimmed.includes('Started') || trimmed.includes('Reading')) {
+        return; // Skip delimiter bars and boot headers
+      }
+
+      // Format D: Arduino Point / GPIO format (e.g. "Point 1 (GPIO 32): 2145" or "Point 1: 2145" or "GPIO 32: 2145")
+      const pointMatch = trimmed.match(/^(?:Point\s*(\d+)(?:\s*\((?:GPIO\s*)?(\d+)\))?|(?:GPIO\s*)(\d+))\s*:\s*(\d+)/i);
+      if (pointMatch) {
+        const pointIdx = pointMatch[1] ? parseInt(pointMatch[1], 10) : null;
+        const gpioPin = pointMatch[2] ? parseInt(pointMatch[2], 10) : (pointMatch[3] ? parseInt(pointMatch[3], 10) : null);
+        const rawVal = parseInt(pointMatch[4], 10);
+
+        const targetSensorId = mapHardwarePointToSensor(pointIdx, gpioPin);
+        if (targetSensorId) {
+          applyHardwareReading(targetSensorId, rawVal, `Point ${pointIdx || '?'} (GPIO ${gpioPin || (31 + pointIdx)})`);
+          const updates = {};
+          updates[targetSensorId] = rawVal;
+          this.onLineReceived({ type: 'multichannel_named', data: updates });
+        }
+        return;
+      }
+
+      // Format C: Key-Value pairs (e.g. "heel:2450,toe_medial:1200")
       if (line.includes(':')) {
         const pairs = line.split(',');
         const updates = {};
@@ -761,18 +890,22 @@
           const num = parseInt(v, 10);
           if (resolved && !isNaN(num)) updates[resolved] = num;
         });
-        this.onLineReceived({ type: 'multichannel_named', data: updates });
+        if (Object.keys(updates).length > 0) {
+          this.onLineReceived({ type: 'multichannel_named', data: updates });
+        }
         return;
       }
 
-      // Multi-value CSV (Format B, e.g. "100,200,300,400,500")
+      // Format B: Multi-value CSV (e.g. "100,200,300,400,500")
       if (line.includes(',')) {
         const parts = line.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
-        this.onLineReceived({ type: 'multichannel_indexed', data: parts });
+        if (parts.length > 0) {
+          this.onLineReceived({ type: 'multichannel_indexed', data: parts });
+        }
         return;
       }
 
-      // Single integer ADC value (Format A, e.g. "2450")
+      // Format A: Single integer ADC value (e.g. "2450")
       const val = parseInt(line, 10);
       if (!isNaN(val)) {
         this.onLineReceived({ type: 'single_channel', raw: val });
@@ -1285,14 +1418,14 @@ Provide a concise, professional, structured clinical report covering:
     }
   }
 
-  function applyHardwareReading(sensorId, rawVal) {
+  function applyHardwareReading(sensorId, rawVal, sourceLabel) {
     const s = state.sensors[sensorId];
     if (!s) return;
 
     state.rawADC = rawVal;
     s.rawReading = rawVal;
     s.hasSignal = true;
-    s.source = 'ESP32 GPIO32 (USB Serial)';
+    s.source = sourceLabel || 'ESP32 (USB Serial)';
 
     const min = Math.min(state.calibMin, state.calibMax);
     const max = Math.max(state.calibMin, state.calibMax);
@@ -1365,18 +1498,19 @@ Provide a concise, professional, structured clinical report covering:
       btnSim.classList.remove('active');
       btnSim.setAttribute('aria-selected', 'false');
 
-      vizNote.textContent = 'Hardware Mode — Live readings mapped to designated regional sensor only.';
+      vizNote.textContent = state.hwConnected
+        ? 'Hardware Mode — Live 5-channel USB serial telemetry active (GPIO 32, 33, 34, 35, 36).'
+        : 'Hardware Mode — Connect ESP32 USB serial to stream live sensor readings.';
 
       SENSOR_LOCATIONS.forEach(loc => {
         const s = state.sensors[loc.id];
-        if (loc.id !== state.hwMappedSensorId) {
+        s.hasSignal = state.hwConnected;
+        if (state.hwConnected) {
+          s.source = 'ESP32 (USB Serial)';
+        } else {
           s.targetValue = 0;
           s.rawReading = null;
-          s.source = 'No Signal (Unmapped in single-channel mode)';
-          s.hasSignal = false;
-        } else {
-          s.source = 'ESP32 GPIO32 (USB Serial)';
-          s.hasSignal = state.hwConnected;
+          s.source = 'Disconnected (Connect ESP32)';
         }
       });
     }
@@ -1416,8 +1550,8 @@ Provide a concise, professional, structured clinical report covering:
     document.getElementById('info-label').textContent = s.label;
     document.getElementById('info-region').textContent = s.region;
 
-    if (state.mode === 'hardware' && s.id === state.hwMappedSensorId) {
-      document.getElementById('info-raw').textContent = (s.rawReading !== null) ? `${s.rawReading} / 4095` : 'Awaiting data...';
+    if (state.mode === 'hardware') {
+      document.getElementById('info-raw').textContent = (s.rawReading !== null) ? `${s.rawReading} / 4095` : (state.hwConnected ? 'Awaiting pin data...' : 'Disconnected');
       document.getElementById('info-normalized').textContent = `${(s.targetValue * 100).toFixed(1)}%`;
       document.getElementById('info-peak').textContent = `${(s.peakValue * 100).toFixed(1)}%`;
       document.getElementById('info-source').textContent = s.source;
@@ -1477,7 +1611,7 @@ Provide a concise, professional, structured clinical report covering:
     });
 
     document.getElementById('stat-active').textContent = `${activeCount} / ${SENSOR_LOCATIONS.length}`;
-    document.getElementById('stat-hw-channels').textContent = (state.mode === 'hardware' && state.hwConnected) ? '1 (GPIO32)' : '0';
+    document.getElementById('stat-hw-channels').textContent = (state.mode === 'hardware' && state.hwConnected) ? '5 (GPIO 32–36)' : '0';
     document.getElementById('stat-max-pressure').textContent = `${(maxPressure * 100).toFixed(1)}%`;
     document.getElementById('stat-max-location').textContent = maxPressure > 0.03 ? maxLocation : '—';
     document.getElementById('stat-hz').textContent = `${hz} Hz`;
@@ -1515,6 +1649,9 @@ Provide a concise, professional, structured clinical report covering:
       if (connLabel) connLabel.textContent = 'Connected';
       btn.textContent = 'Disconnect';
       state.hwConnected = true;
+
+      // Automatically switch to Hardware Mode on successful connection
+      setMode('hardware');
     } else if (status === 'error') {
       dot.className = 'status-dot';
       label.textContent = detail || 'Connection Error';
@@ -1527,6 +1664,9 @@ Provide a concise, professional, structured clinical report covering:
       if (connLabel) connLabel.textContent = 'Disconnected';
       btn.textContent = 'Connect';
       state.hwConnected = false;
+
+      const term = document.getElementById('serial-terminal-log');
+      if (term) term.textContent = 'ESP32 disconnected. Waiting for connection...';
     }
 
     updateUI();
@@ -1662,6 +1802,8 @@ Provide a concise, professional, structured clinical report covering:
   function updateUI() {
     document.getElementById('toggle-invert').checked = state.invertADC;
     document.getElementById('calib-range').textContent = `${state.calibMin} — ${state.calibMax} ${state.invertADC ? '(Inverted)' : ''}`;
+    const mappingSelect = document.getElementById('hw-mapping-preset');
+    if (mappingSelect) mappingSelect.value = state.hardwareMappingPreset;
     selectSensor(state.selectedSensorId);
   }
 
@@ -1974,6 +2116,18 @@ Provide a concise, professional, structured clinical report covering:
     document.getElementById('btn-preset-full').addEventListener('click', () => applyPreset('full'));
 
     // Hardware Controls
+    const mappingPresetSelect = document.getElementById('hw-mapping-preset');
+    if (mappingPresetSelect) {
+      mappingPresetSelect.addEventListener('change', (e) => {
+        const preset = e.target.value;
+        if (HARDWARE_MAPPING_PRESETS[preset]) {
+          state.hardwareMappingPreset = preset;
+          state.hardwareMapping = { ...HARDWARE_MAPPING_PRESETS[preset] };
+          saveCalibration();
+        }
+      });
+    }
+
     document.getElementById('hw-channel-sensor').addEventListener('change', (e) => {
       state.hwMappedSensorId = e.target.value;
       saveCalibration();

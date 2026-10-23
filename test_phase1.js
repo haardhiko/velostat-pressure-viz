@@ -112,6 +112,22 @@ class TestSerialAdapter {
     this.packets = [];
   }
   parseLine(line) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('---') || trimmed.includes('Started') || trimmed.includes('Reading')) {
+      return;
+    }
+
+    const pointMatch = trimmed.match(/^(?:Point\s*(\d+)(?:\s*\((?:GPIO\s*)?(\d+)\))?|(?:GPIO\s*)(\d+))\s*:\s*(\d+)/i);
+    if (pointMatch) {
+      const pointIdx = pointMatch[1] ? parseInt(pointMatch[1], 10) : null;
+      const rawVal = parseInt(pointMatch[4], 10);
+      const updates = {};
+      const mapping = { 1: 'toe_medial', 2: 'toe_lateral', 3: 'forefoot', 4: 'midfoot', 5: 'heel' };
+      updates[mapping[pointIdx] || `point_${pointIdx}`] = rawVal;
+      this.packets.push({ type: 'multichannel_named', data: updates });
+      return;
+    }
+
     if (line.includes(':')) {
       const pairs = line.split(',');
       const updates = {};
@@ -139,11 +155,18 @@ const adapter = new TestSerialAdapter();
 adapter.parseLine('2048');
 adapter.parseLine('heel:3200,forefoot:1500');
 adapter.parseLine('100,200,300,400,500');
+adapter.parseLine('Velostat Sensor Started');
+adapter.parseLine('Point 1 (GPIO 32): 2145');
+adapter.parseLine('Point 5 (GPIO 36): 4095');
+adapter.parseLine('--------------------');
 
 if (adapter.packets[0].type === 'single_channel' && adapter.packets[0].raw === 2048 &&
     adapter.packets[1].type === 'multichannel_named' && adapter.packets[1].data.heel === 3200 &&
-    adapter.packets[2].type === 'multichannel_indexed' && adapter.packets[2].data.length === 5) {
-  console.log('PASS: SerialAdapter parsing verified (Format A single integer, Format B CSV, Format C key-value).');
+    adapter.packets[2].type === 'multichannel_indexed' && adapter.packets[2].data.length === 5 &&
+    adapter.packets[3].type === 'multichannel_named' && adapter.packets[3].data.toe_medial === 2145 &&
+    adapter.packets[4].type === 'multichannel_named' && adapter.packets[4].data.heel === 4095 &&
+    adapter.packets.length === 5) {
+  console.log('PASS: SerialAdapter parsing verified (Format A single integer, Format B CSV, Format C key-value, Format D Arduino Point/GPIO).');
 } else {
   console.error('FAIL: SerialAdapter packet parsing error');
   process.exit(1);

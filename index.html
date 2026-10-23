@@ -333,8 +333,24 @@
           </p>
 
           <div class="control-group" style="margin-top: 10px;">
-            <label for="hw-channel-sensor">Physical Sensor Mapped Region:</label>
+            <label for="hw-mapping-preset">5-Sensor GPIO Pin Mapping:</label>
+            <select id="hw-mapping-preset">
+              <option value="toe_to_heel" selected>Toes → Heel (Pt 1=Big Toe, Pt 5=Heel)</option>
+              <option value="heel_to_toe">Heel → Toes (Pt 1=Heel, Pt 5=Big Toe)</option>
+            </select>
+          </div>
+
+          <div class="control-group" style="margin-top: 8px;">
+            <label for="hw-channel-sensor">Single-Channel Focus / Target:</label>
             <select id="hw-channel-sensor"></select>
+          </div>
+
+          <div class="serial-monitor-container" style="margin-top: 12px;">
+            <div class="serial-monitor-header">
+              <span class="serial-monitor-title">Live Serial Stream (GPIO 32–36)</span>
+              <span class="live-pulse-dot" id="serial-rx-dot"></span>
+            </div>
+            <div class="serial-terminal" id="serial-terminal-log">Waiting for ESP32 serial data... (115200 Baud)</div>
           </div>
         </div>
 
