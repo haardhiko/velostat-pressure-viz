@@ -243,12 +243,12 @@
       <section class="visualization-section" aria-label="Plantar Pressure Visualization">
         <div class="stage-tag-row">
           <span class="stage-tag">RIGHT FOOT &middot; PLANTAR VIEW</span>
-          <span class="stage-channels-tag">4 REGIONS: TOES &middot; FOREFOOT &middot; MIDFOOT &middot; HEEL</span>
+          <span class="stage-channels-tag">4 REGIONS: TOES &middot; FOREFOOT &middot; MIDFOOT &middot; HEEL (5 SENSORS)</span>
         </div>
 
         <div class="pad-container foot-container" id="foot-container">
           <canvas id="foot-canvas" width="400" height="740" tabindex="0" role="img"
-            aria-label="Plantar pressure heatmap. Click on any of the 4 regions (Toes, Forefoot, Midfoot, Heel) to inspect."></canvas>
+            aria-label="Plantar pressure heatmap. Click on any of the 4 regions (Toes, Forefoot, Midfoot [Medial & Lateral Arch], Heel) to inspect."></canvas>
           <!-- Alias canvas for legacy test suites -->
           <canvas id="pressure-canvas" width="1" height="1" style="display:none;"></canvas>
 
@@ -265,7 +265,7 @@
         </div>
 
         <p class="viz-note" id="viz-note">
-          Simulation Mode &mdash; Click or drag on Toes, Forefoot, Midfoot, or Heel to test pressure response.
+          Simulation Mode &mdash; Click or drag on Toes, Forefoot, Arch, or Heel to test pressure response.
         </p>
       </section>
 
@@ -335,8 +335,9 @@
           <div class="control-group" style="margin-top: 10px;">
             <label for="hw-mapping-preset">5-Sensor GPIO Pin Mapping:</label>
             <select id="hw-mapping-preset">
-              <option value="toe_to_heel" selected>Toes → Heel (Pt 1=Big Toe, Pt 5=Heel)</option>
-              <option value="heel_to_toe">Heel → Toes (Pt 1=Heel, Pt 5=Big Toe)</option>
+              <option value="toe_to_heel" selected>Standard: Toes → Forefoot → Medial Arch → Lateral Arch → Heel</option>
+              <option value="heel_to_toe">Reversed: Heel → Lateral Arch → Medial Arch → Forefoot → Toes</option>
+              <option value="toes_arch_forefoot_heel">Toes → Medial Arch → Lateral Arch → Forefoot → Heel</option>
             </select>
           </div>
 
@@ -451,9 +452,10 @@
 
           <div class="button-group">
             <button class="btn btn-secondary" id="btn-calibrate">Auto-Calibrate</button>
-            <button class="btn btn-secondary" id="btn-zero">Zero</button>
+            <button class="btn btn-secondary" id="btn-zero" title="Tare all 5 sensors to current resting baseline pressure">Set Baseline (Tare)</button>
             <button class="btn btn-secondary" id="btn-reset-peak">Reset Peak</button>
           </div>
+          <div class="baseline-status" id="baseline-status-hint">Baseline Tare: Rest foot/insole, then click 'Set Baseline (Tare)' to zero resting voltage.</div>
         </div>
 
       </section>

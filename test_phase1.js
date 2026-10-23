@@ -51,28 +51,28 @@ for (const r of expectedRegions) {
 }
 console.log('PASS: All expected anatomical regions (Toes, Forefoot, Midfoot, Heel) are represented.');
 
-// Verify 5 sensors with unique IDs (2 in toes with good separation, 1 in forefoot, 1 in midfoot, 1 in heel)
+// Verify 5 sensors with unique IDs (1 in toes, 1 in forefoot, 2 in midfoot/arch with wide separation, 1 in heel)
 const sensorIds = SENSOR_LOCATIONS.map(s => s.id);
 const uniqueSensorIds = new Set(sensorIds);
 if (uniqueSensorIds.size !== 5) {
   console.error(`FAIL: Expected 5 unique sensor IDs, found ${uniqueSensorIds.size}`);
   process.exit(1);
 }
-console.log('PASS: Exactly 5 unique sensor locations defined (Toe Medial, Toe Lateral, Forefoot, Midfoot, Heel).');
+console.log('PASS: Exactly 5 unique sensor locations defined (Toes, Forefoot, Medial Arch, Lateral Arch, Heel).');
 
-// Verify good distance between the two toe sensors
-const toe1 = SENSOR_LOCATIONS.find(s => s.id === 'toe_medial');
-const toe2 = SENSOR_LOCATIONS.find(s => s.id === 'toe_lateral');
-if (!toe1 || !toe2) {
-  console.error('FAIL: Could not find both toe sensors (toe_medial, toe_lateral)');
+// Verify good distance between the two arch sensors (Medial Arch and Lateral Arch)
+const arch1 = SENSOR_LOCATIONS.find(s => s.id === 'arch_medial' || s.id === 'midfoot');
+const arch2 = SENSOR_LOCATIONS.find(s => s.id === 'arch_lateral');
+if (!arch1 || !arch2) {
+  console.error('FAIL: Could not find both arch sensors (arch_medial, arch_lateral)');
   process.exit(1);
 }
-const toeDist = Math.sqrt(Math.pow(toe1.x - toe2.x, 2) + Math.pow(toe1.y - toe2.y, 2));
-if (toeDist < 0.20) {
-  console.error(`FAIL: Toe sensors too close together (dist=${toeDist.toFixed(3)})`);
+const archDist = Math.sqrt(Math.pow(arch1.x - arch2.x, 2) + Math.pow(arch1.y - arch2.y, 2));
+if (archDist < 0.20) {
+  console.error(`FAIL: Arch sensors too close together (dist=${archDist.toFixed(3)})`);
   process.exit(1);
 }
-console.log(`PASS: Two toe sensors separated by good distance (dist=${toeDist.toFixed(3)} in normalized space).`);
+console.log(`PASS: Two arch sensors separated by good distance (dist=${archDist.toFixed(3)} in normalized space).`);
 
 // 3. Test independence of sensor states
 const sensors = {};
@@ -92,14 +92,14 @@ for (const id of sensorIds) {
 console.log('PASS: Sensor value independence verified (pressing heel does not alter toes/arch).');
 
 // 4. Test simultaneous pressure at multiple locations
-sensors['toe_medial'].targetValue = 0.95;
-sensors['toe_lateral'].targetValue = 0.65;
+sensors['toes'].targetValue = 0.95;
+sensors['arch_medial'].targetValue = 0.65;
 sensors['forefoot'].targetValue = 0.70;
 if (sensors['heel'].targetValue === 0.85 &&
-    sensors['toe_medial'].targetValue === 0.95 &&
-    sensors['toe_lateral'].targetValue === 0.65 &&
+    sensors['toes'].targetValue === 0.95 &&
+    sensors['arch_medial'].targetValue === 0.65 &&
     sensors['forefoot'].targetValue === 0.70 &&
-    sensors['midfoot'].targetValue === 0) {
+    sensors['arch_lateral'].targetValue === 0) {
   console.log('PASS: Simultaneous multi-location pressure verified.');
 } else {
   console.error('FAIL: Multi-location state error');
@@ -122,7 +122,7 @@ class TestSerialAdapter {
       const pointIdx = pointMatch[1] ? parseInt(pointMatch[1], 10) : null;
       const rawVal = parseInt(pointMatch[4], 10);
       const updates = {};
-      const mapping = { 1: 'toe_medial', 2: 'toe_lateral', 3: 'forefoot', 4: 'midfoot', 5: 'heel' };
+      const mapping = { 1: 'toes', 2: 'forefoot', 3: 'arch_medial', 4: 'arch_lateral', 5: 'heel' };
       updates[mapping[pointIdx] || `point_${pointIdx}`] = rawVal;
       this.packets.push({ type: 'multichannel_named', data: updates });
       return;
@@ -163,7 +163,7 @@ adapter.parseLine('--------------------');
 if (adapter.packets[0].type === 'single_channel' && adapter.packets[0].raw === 2048 &&
     adapter.packets[1].type === 'multichannel_named' && adapter.packets[1].data.heel === 3200 &&
     adapter.packets[2].type === 'multichannel_indexed' && adapter.packets[2].data.length === 5 &&
-    adapter.packets[3].type === 'multichannel_named' && adapter.packets[3].data.toe_medial === 2145 &&
+    adapter.packets[3].type === 'multichannel_named' && adapter.packets[3].data.toes === 2145 &&
     adapter.packets[4].type === 'multichannel_named' && adapter.packets[4].data.heel === 4095 &&
     adapter.packets.length === 5) {
   console.log('PASS: SerialAdapter parsing verified (Format A single integer, Format B CSV, Format C key-value, Format D Arduino Point/GPIO).');

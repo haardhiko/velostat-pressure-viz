@@ -13,10 +13,10 @@
 
   /**
    * 5 Anatomical sensor locations:
-   * 1. Big Toe (Hallux): Medial toe crest
-   * 2. Lateral Toes: Digits 2-5 lateral crest (separated with good distance from Big Toe)
-   * 3. Forefoot: Metatarsal ball
-   * 4. Midfoot: Plantar arch / instep
+   * 1. Toes: Unified digital crest & hallux pad
+   * 2. Forefoot: Metatarsal ball
+   * 3. Medial Arch: Plantar instep (inner arch)
+   * 4. Lateral Arch: Outer midfoot (lateral longitudinal arch)
    * 5. Heel: Calcaneus rearfoot cup
    *
    * Normalized coordinates (x: 0..1, y: 0..1) relative to foot bounding box:
@@ -24,15 +24,15 @@
    * y=0 is distal (toes), y=1 is proximal (heel)
    */
   const SENSOR_LOCATIONS = [
-    // --- Toes: 2 Well-Spaced Sensors across Unified Digital Crest ---
-    { id: 'toe_medial', label: 'Big Toe (Hallux)', region: 'Toes', x: 0.36, y: 0.12, radius: 0.09 },
-    { id: 'toe_lateral', label: 'Lateral Toes (Digits 2-5)', region: 'Toes', x: 0.65, y: 0.17, radius: 0.09 },
+    // --- Toes: 1 Sensor covering Unified Digital Crest & Hallux Pad ---
+    { id: 'toes', label: 'Toes (Digital Crest)', region: 'Toes', x: 0.44, y: 0.12, radius: 0.11 },
 
     // --- Forefoot: Metatarsal Ball ---
     { id: 'forefoot', label: 'Forefoot (Ball)', region: 'Forefoot', x: 0.50, y: 0.35, radius: 0.13 },
 
-    // --- Midfoot: Plantar Arch ---
-    { id: 'midfoot', label: 'Midfoot (Arch)', region: 'Midfoot', x: 0.54, y: 0.57, radius: 0.12 },
+    // --- Midfoot: 2 Arch Sensors (Medial Arch & Lateral Arch with wide separation) ---
+    { id: 'arch_medial', label: 'Medial Arch (Instep)', region: 'Midfoot', x: 0.36, y: 0.58, radius: 0.11 },
+    { id: 'arch_lateral', label: 'Lateral Arch (Outer Midfoot)', region: 'Midfoot', x: 0.68, y: 0.58, radius: 0.11 },
 
     // --- Heel: Calcaneus Cup ---
     { id: 'heel', label: 'Heel (Calcaneus)', region: 'Heel', x: 0.53, y: 0.80, radius: 0.13 }
@@ -135,18 +135,25 @@
 
   const HARDWARE_MAPPING_PRESETS = {
     'toe_to_heel': {
-      1: 'toe_medial',
-      2: 'toe_lateral',
-      3: 'forefoot',
-      4: 'midfoot',
+      1: 'toes',
+      2: 'forefoot',
+      3: 'arch_medial',
+      4: 'arch_lateral',
       5: 'heel'
     },
     'heel_to_toe': {
       1: 'heel',
-      2: 'midfoot',
-      3: 'forefoot',
-      4: 'toe_lateral',
-      5: 'toe_medial'
+      2: 'arch_lateral',
+      3: 'arch_medial',
+      4: 'forefoot',
+      5: 'toes'
+    },
+    'toes_arch_forefoot_heel': {
+      1: 'toes',
+      2: 'arch_medial',
+      3: 'arch_lateral',
+      4: 'forefoot',
+      5: 'heel'
     }
   };
 
@@ -157,6 +164,9 @@
 
     // Per-sensor dynamic values
     sensors: {},
+
+    // UI render throttling & performance flags
+    uiDirty: true,
 
     // Hardware connection state & 5-Point GPIO Pin Mapping
     hwMappedSensorId: 'heel', // Physical single-channel fallback
@@ -177,6 +187,8 @@
     isCalibrating: false,
     sensitivity: 0.35, // 0.10 to 1.00 (35% default: significantly less sensitive)
     deadzone: 0.08,    // 0.00 to 0.25 (8% resting noise deadzone)
+    baselineTareCaptured: false,
+    autoTareTimeout: null,
 
     // Drag interaction tracking
     isCanvasDragging: false,
@@ -239,59 +251,64 @@
     }
 
     const aliases = {
-      'point 1': state.hardwareMapping ? state.hardwareMapping[1] : 'toe_medial',
-      'point 2': state.hardwareMapping ? state.hardwareMapping[2] : 'toe_lateral',
-      'point 3': state.hardwareMapping ? state.hardwareMapping[3] : 'forefoot',
-      'point 4': state.hardwareMapping ? state.hardwareMapping[4] : 'midfoot',
+      'point 1': state.hardwareMapping ? state.hardwareMapping[1] : 'toes',
+      'point 2': state.hardwareMapping ? state.hardwareMapping[2] : 'forefoot',
+      'point 3': state.hardwareMapping ? state.hardwareMapping[3] : 'arch_medial',
+      'point 4': state.hardwareMapping ? state.hardwareMapping[4] : 'arch_lateral',
       'point 5': state.hardwareMapping ? state.hardwareMapping[5] : 'heel',
-      'point_1': 'toe_medial',
-      'point_2': 'toe_lateral',
-      'point_3': 'forefoot',
-      'point_4': 'midfoot',
+      'point_1': 'toes',
+      'point_2': 'forefoot',
+      'point_3': 'arch_medial',
+      'point_4': 'arch_lateral',
       'point_5': 'heel',
-      'p1': 'toe_medial',
-      'p2': 'toe_lateral',
-      'p3': 'forefoot',
-      'p4': 'midfoot',
+      'p1': 'toes',
+      'p2': 'forefoot',
+      'p3': 'arch_medial',
+      'p4': 'arch_lateral',
       'p5': 'heel',
-      'gpio 32': 'toe_medial',
-      'gpio 33': 'toe_lateral',
-      'gpio 34': 'forefoot',
-      'gpio 35': 'midfoot',
+      'gpio 32': 'toes',
+      'gpio 33': 'forefoot',
+      'gpio 34': 'arch_medial',
+      'gpio 35': 'arch_lateral',
       'gpio 36': 'heel',
-      'gpio32': 'toe_medial',
-      'gpio33': 'toe_lateral',
-      'gpio34': 'forefoot',
-      'gpio35': 'midfoot',
+      'gpio32': 'toes',
+      'gpio33': 'forefoot',
+      'gpio34': 'arch_medial',
+      'gpio35': 'arch_lateral',
       'gpio36': 'heel',
-      '32': 'toe_medial',
-      '33': 'toe_lateral',
-      '34': 'forefoot',
-      '35': 'midfoot',
+      '32': 'toes',
+      '33': 'forefoot',
+      '34': 'arch_medial',
+      '35': 'arch_lateral',
       '36': 'heel',
-      'toes': 'toe_medial',
-      'toe': 'toe_medial',
-      'toe_1': 'toe_medial',
-      'hallux': 'toe_medial',
-      'toe_medial': 'toe_medial',
-      'toes_medial': 'toe_medial',
-      'toe_2': 'toe_lateral',
-      'toe_3': 'toe_lateral',
-      'toe_4': 'toe_lateral',
-      'toe_5': 'toe_lateral',
-      'toe_lateral': 'toe_lateral',
-      'toes_lateral': 'toe_lateral',
+      'toes': 'toes',
+      'toe': 'toes',
+      'toe_1': 'toes',
+      'hallux': 'toes',
+      'toe_medial': 'toes',
+      'toes_medial': 'toes',
+      'toe_lateral': 'arch_lateral',
+      'toes_lateral': 'arch_lateral',
+      'toe_2': 'arch_lateral',
+      'toe_3': 'arch_lateral',
+      'toe_4': 'arch_lateral',
+      'toe_5': 'arch_lateral',
       'forefoot': 'forefoot',
       'ball': 'forefoot',
       'meta_1': 'forefoot',
       'meta_2': 'forefoot',
       'meta_3': 'forefoot',
       'meta_5': 'forefoot',
-      'midfoot': 'midfoot',
-      'arch': 'midfoot',
-      'arch_medial': 'midfoot',
-      'arch_lateral': 'midfoot',
-      'midfoot_center': 'midfoot',
+      'arch_medial': 'arch_medial',
+      'arch_lateral': 'arch_lateral',
+      'medial_arch': 'arch_medial',
+      'lateral_arch': 'arch_lateral',
+      'midfoot': 'arch_medial',
+      'arch': 'arch_medial',
+      'instep': 'arch_medial',
+      'midfoot_medial': 'arch_medial',
+      'midfoot_lateral': 'arch_lateral',
+      'midfoot_center': 'arch_medial',
       'heel': 'heel',
       'heel_center': 'heel',
       'heel_medial': 'heel',
@@ -300,13 +317,14 @@
     return aliases[clean] || null;
   }
 
-  // Initialize sensors state
+  // Initialize sensors state with baseline ADC tare support
   SENSOR_LOCATIONS.forEach((loc) => {
     state.sensors[loc.id] = {
       ...loc,
       targetValue: 0.0,
       currentValue: 0.0,
       rawReading: null,
+      baselineADC: null, // Resting baseline reading captured during tare
       peakValue: 0.0,
       source: 'Simulated',
       hasSignal: true
@@ -403,6 +421,11 @@
       this.height = 740;
       this.dpr = window.devicePixelRatio || 1;
 
+      // Offscreen pre-rendered background canvas for static sole & zone geometry
+      this.bgCanvas = document.createElement('canvas');
+      this.bgCtx = this.bgCanvas.getContext('2d');
+      this.solePath2D = null;
+
       this.resize();
       window.addEventListener('resize', () => this.resize());
     }
@@ -417,6 +440,7 @@
       this.height = h;
       this.dpr = window.devicePixelRatio || 1;
 
+      // Size main on-screen canvas
       this.canvas.width = Math.round(w * this.dpr);
       this.canvas.height = Math.round(h * this.dpr);
       this.canvas.style.width = `${w}px`;
@@ -424,78 +448,55 @@
 
       this.ctx.resetTransform();
       this.ctx.scale(this.dpr, this.dpr);
+
+      // Size offscreen background canvas
+      this.bgCanvas.width = Math.round(w * this.dpr);
+      this.bgCanvas.height = Math.round(h * this.dpr);
+      this.bgCtx.resetTransform();
+      this.bgCtx.scale(this.dpr, this.dpr);
+
+      // Pre-compile Path2D for GPU-cached clipping
+      this.solePath2D = new Path2D();
+      this.traceSolePathTo(this.solePath2D, w, h);
+
+      // Pre-render static foot sole & zone dividers once
+      this.preRenderStaticBackground(w, h);
     }
 
-    render() {
-      const ctx = this.ctx;
-      const w = this.width;
-      const h = this.height;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // 1. Draw foot sole silhouette with unified 5-toes part at top
-      this.drawSoleBackground(ctx, w, h);
-
-      // 2. Render localized pressure heatmap for each sensor (clipped inside sole)
-      this.drawPressureHeatmap(ctx, w, h);
-
-      // 3. Draw anatomical zone boundary dividers & region watermarks
-      this.drawZoneDividers(ctx, w, h);
-
-      // 4. Draw tactile contact touch ripple/point
-      this.drawContactPoint(ctx, w, h);
-
-      // 5. Draw sensor location nodes, letter badges, and percentage pills
-      this.drawSensorNodes(ctx, w, h);
+    traceSolePathTo(target, w, h) {
+      target.moveTo(w * 0.36, h * 0.70);
+      target.bezierCurveTo(w * 0.36, h * 0.60, w * 0.28, h * 0.48, w * 0.25, h * 0.38);
+      target.bezierCurveTo(w * 0.22, h * 0.32, w * 0.22, h * 0.24, w * 0.24, h * 0.20);
+      target.bezierCurveTo(w * 0.25, h * 0.14, w * 0.28, h * 0.08, w * 0.36, h * 0.06);
+      target.bezierCurveTo(w * 0.44, h * 0.05, w * 0.52, h * 0.07, w * 0.60, h * 0.10);
+      target.bezierCurveTo(w * 0.68, h * 0.13, w * 0.76, h * 0.17, w * 0.81, h * 0.22);
+      target.bezierCurveTo(w * 0.84, h * 0.26, w * 0.84, h * 0.32, w * 0.82, h * 0.38);
+      target.bezierCurveTo(w * 0.80, h * 0.48, w * 0.77, h * 0.58, w * 0.74, h * 0.68);
+      target.bezierCurveTo(w * 0.72, h * 0.78, w * 0.68, h * 0.86, w * 0.62, h * 0.90);
+      target.bezierCurveTo(w * 0.56, h * 0.93, w * 0.46, h * 0.93, w * 0.40, h * 0.90);
+      target.bezierCurveTo(w * 0.35, h * 0.85, w * 0.34, h * 0.78, w * 0.36, h * 0.70);
+      target.closePath();
     }
 
     traceSolePath(ctx, w, h) {
       ctx.beginPath();
-      // Start at Medial Heel
-      ctx.moveTo(w * 0.36, h * 0.70);
-
-      // Medial Arch: sweeps inward gracefully
-      ctx.bezierCurveTo(w * 0.36, h * 0.60, w * 0.28, h * 0.48, w * 0.25, h * 0.38);
-
-      // Medial Forefoot / 1st Metatarsal head bulge
-      ctx.bezierCurveTo(w * 0.22, h * 0.32, w * 0.22, h * 0.24, w * 0.24, h * 0.20);
-
-      // Medial Hallux (Big Toe) edge curving up
-      ctx.bezierCurveTo(w * 0.25, h * 0.14, w * 0.28, h * 0.08, w * 0.36, h * 0.06);
-
-      // Unified 5-Toe Crest across all 5 toes (Big toe to 5th toe cascade)
-      ctx.bezierCurveTo(w * 0.44, h * 0.05, w * 0.52, h * 0.07, w * 0.60, h * 0.10);
-      ctx.bezierCurveTo(w * 0.68, h * 0.13, w * 0.76, h * 0.17, w * 0.81, h * 0.22);
-
-      // Lateral 5th toe & Lateral Forefoot bulge
-      ctx.bezierCurveTo(w * 0.84, h * 0.26, w * 0.84, h * 0.32, w * 0.82, h * 0.38);
-
-      // Lateral Midfoot / Arch border
-      ctx.bezierCurveTo(w * 0.80, h * 0.48, w * 0.77, h * 0.58, w * 0.74, h * 0.68);
-
-      // Lateral Heel
-      ctx.bezierCurveTo(w * 0.72, h * 0.78, w * 0.68, h * 0.86, w * 0.62, h * 0.90);
-
-      // Rounded Heel bottom
-      ctx.bezierCurveTo(w * 0.56, h * 0.93, w * 0.46, h * 0.93, w * 0.40, h * 0.90);
-
-      // Medial Heel curve back to start
-      ctx.bezierCurveTo(w * 0.35, h * 0.85, w * 0.34, h * 0.78, w * 0.36, h * 0.70);
-      ctx.closePath();
+      this.traceSolePathTo(ctx, w, h);
     }
 
-    drawSoleBackground(ctx, w, h) {
+    preRenderStaticBackground(w, h) {
+      const ctx = this.bgCtx;
+      ctx.clearRect(0, 0, w, h);
+
       ctx.save();
 
-      // Main Insole Silhouette
-      this.traceSolePath(ctx, w, h);
+      // 1. Foot Insole Silhouette
       ctx.fillStyle = '#0b1329';
-      ctx.fill();
+      ctx.fill(this.solePath2D);
       ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 2.0;
-      ctx.stroke();
+      ctx.stroke(this.solePath2D);
 
-      // Highlight the Unified 5-Toes Part as 1 Contoured Region at the top
+      // 2. Unified 5-Toes Region at the top
       ctx.beginPath();
       ctx.moveTo(w * 0.24, h * 0.21);
       ctx.bezierCurveTo(w * 0.24, h * 0.14, w * 0.27, h * 0.08, w * 0.36, h * 0.06);
@@ -510,11 +511,7 @@
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      ctx.restore();
-    }
-
-    drawZoneDividers(ctx, w, h) {
-      ctx.save();
+      // 3. Anatomical Zone Boundary Dividers
       ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
       ctx.lineWidth = 1.2;
       ctx.setLineDash([5, 4]);
@@ -539,13 +536,13 @@
 
       ctx.setLineDash([]);
 
-      // Watermark labels
+      // 4. Region Watermark Labels
       ctx.font = '700 9.5px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
 
-      ctx.fillText('TOES (HALLUX & DIGITS)', w * 0.50, h * 0.08);
+      ctx.fillText('TOES (ALL 5 TOES)', w * 0.50, h * 0.08);
       ctx.fillText('FOREFOOT (BALL)', w * 0.50, h * 0.44);
       ctx.fillText('MIDFOOT (ARCH)', w * 0.54, h * 0.66);
       ctx.fillText('HEEL (CALCANEUS)', w * 0.53, h * 0.89);
@@ -553,10 +550,45 @@
       ctx.restore();
     }
 
+    drawSoleBackground(ctx, w, h) {
+      // Kept for backward compatibility
+      if (this.bgCanvas) {
+        ctx.drawImage(this.bgCanvas, 0, 0, w, h);
+      }
+    }
+
+    drawZoneDividers(ctx, w, h) {
+      // Static dividers are already pre-rendered in bgCanvas
+    }
+
+    render() {
+      const ctx = this.ctx;
+      const w = this.width;
+      const h = this.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // 1. Instantaneous GPU Blit of pre-rendered static background & zone dividers
+      ctx.drawImage(this.bgCanvas, 0, 0, w, h);
+
+      // 2. Render localized pressure heatmap for each sensor (clipped via GPU-cached Path2D)
+      this.drawPressureHeatmap(ctx, w, h);
+
+      // 3. Draw tactile contact touch ripple/point (if user dragging)
+      this.drawContactPoint(ctx, w, h);
+
+      // 4. Draw sensor location nodes, letter badges, and percentage pills
+      this.drawSensorNodes(ctx, w, h);
+    }
+
     drawPressureHeatmap(ctx, w, h) {
       ctx.save();
-      this.traceSolePath(ctx, w, h);
-      ctx.clip();
+      if (this.solePath2D) {
+        ctx.clip(this.solePath2D);
+      } else {
+        this.traceSolePath(ctx, w, h);
+        ctx.clip();
+      }
 
       SENSOR_LOCATIONS.forEach((loc) => {
         const s = state.sensors[loc.id];
@@ -632,12 +664,96 @@
       ctx.save();
 
       const nodeLetters = {
-        'toe_medial': 'T1',
-        'toe_lateral': 'T2',
+        'toes': 'T',
         'forefoot': 'F',
-        'midfoot': 'M',
-        'heel': 'H'
+        'arch_medial': 'AM',
+        'arch_lateral': 'AL',
+        'heel': 'H',
+        // Fallback for aliases
+        'toe_medial': 'T',
+        'toe_lateral': 'AL',
+        'midfoot': 'AM'
       };
+
+      SENSOR_LOCATIONS.forEach((loc, idx) => {
+        const s = state.sensors[loc.id];
+        const cx = loc.x * w;
+        const cy = loc.y * h;
+        const val = s.currentValue;
+        const isSelected = (loc.id === state.selectedSensorId);
+        const isFocused = (idx === state.focusedSensorIndex);
+        const isHwMapped = (state.mode === 'hardware' && loc.id === state.hwMappedSensorId);
+
+        const nodeRadius = 12;
+
+        // Selection ring
+        if (isSelected || isFocused) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, nodeRadius + 5, 0, Math.PI * 2);
+          ctx.strokeStyle = isSelected ? '#38bdf8' : '#94a3b8';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+        }
+
+        // Hardware active badge ring
+        if (isHwMapped) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, nodeRadius + 9, 0, Math.PI * 2);
+          ctx.strokeStyle = state.hwConnected ? '#22c55e' : '#eab308';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([3, 3]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Node center circle
+        ctx.beginPath();
+        ctx.arc(cx, cy, nodeRadius, 0, Math.PI * 2);
+
+        if (val > 0.01) {
+          const rgb = pressureToRGB(val);
+          ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+        } else {
+          ctx.fillStyle = '#1e293b';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.5;
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Node letter (T, F, AM, AL, H)
+        ctx.font = '700 9.5px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = (val > 0.35) ? '#050a14' : '#f8fafc';
+
+        const nodeLetter = nodeLetters[loc.id] || `${idx + 1}`;
+        ctx.fillText(nodeLetter, cx, cy);
+
+        // Value percentage pill badge below node
+        const pctText = `${Math.round(val * 100)}%`;
+        ctx.font = '600 9.5px Inter, sans-serif';
+        const textWidth = ctx.measureText(pctText).width;
+        const badgeW = textWidth + 12;
+        const badgeH = 16;
+        const badgeY = cy + nodeRadius + 5;
+
+        ctx.fillStyle = isSelected ? '#111827' : 'rgba(15, 23, 42, 0.88)';
+        ctx.strokeStyle = isSelected ? '#38bdf8' : 'rgba(148, 163, 184, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(cx - badgeW / 2, badgeY, badgeW, badgeH, 7);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = isSelected ? '#38bdf8' : (val > 0.05 ? '#22c55e' : '#94a3b8');
+        ctx.fillText(pctText, cx, badgeY + badgeH / 2);
+      });
+
+      ctx.restore();
+    }
 
       SENSOR_LOCATIONS.forEach((loc, idx) => {
         const s = state.sensors[loc.id];
@@ -747,27 +863,34 @@
    * ========================================================================== */
 
   let serialMonitorLines = [];
+  let serialMonitorDirty = false;
   let pulseDotTimeout = null;
 
   function appendSerialMonitorLog(line) {
-    const term = document.getElementById('serial-terminal-log');
     const dot = document.getElementById('serial-rx-dot');
-    if (!term) return;
-
     if (dot) {
       dot.classList.add('pulse');
       clearTimeout(pulseDotTimeout);
       pulseDotTimeout = setTimeout(() => {
         dot.classList.remove('pulse');
-      }, 100);
+      }, 90);
     }
 
     serialMonitorLines.push(line);
     if (serialMonitorLines.length > 8) {
       serialMonitorLines.shift();
     }
-    term.textContent = serialMonitorLines.join('\n');
-    term.scrollTop = term.scrollHeight;
+    serialMonitorDirty = true;
+  }
+
+  function flushSerialMonitor() {
+    if (!serialMonitorDirty) return;
+    const term = document.getElementById('serial-terminal-log');
+    if (term) {
+      term.textContent = serialMonitorLines.join('\n');
+      term.scrollTop = term.scrollHeight;
+    }
+    serialMonitorDirty = false;
   }
 
   class SerialAdapter {
@@ -960,14 +1083,22 @@
       }
 
       // Record 5-sensor snapshot
+      const valToes = state.sensors['toes'] ? state.sensors['toes'].currentValue : (state.sensors['toe_medial'] ? state.sensors['toe_medial'].currentValue : 0);
+      const valForefoot = state.sensors['forefoot'] ? state.sensors['forefoot'].currentValue : 0;
+      const valArchMedial = state.sensors['arch_medial'] ? state.sensors['arch_medial'].currentValue : (state.sensors['midfoot'] ? state.sensors['midfoot'].currentValue : 0);
+      const valArchLateral = state.sensors['arch_lateral'] ? state.sensors['arch_lateral'].currentValue : 0;
+      const valHeel = state.sensors['heel'] ? state.sensors['heel'].currentValue : 0;
+
       const sample = {
         t: performance.now(),
-        heel: state.sensors['heel'].currentValue,
-        midfoot: state.sensors['midfoot'].currentValue,
-        forefoot: state.sensors['forefoot'].currentValue,
-        toe_medial: state.sensors['toe_medial'].currentValue,
-        toe_lateral: state.sensors['toe_lateral'].currentValue,
-        toes: Math.max(state.sensors['toe_medial'].currentValue, state.sensors['toe_lateral'].currentValue)
+        heel: valHeel,
+        midfoot: Math.max(valArchMedial, valArchLateral),
+        forefoot: valForefoot,
+        toes: valToes,
+        arch_medial: valArchMedial,
+        arch_lateral: valArchLateral,
+        toe_medial: valToes,
+        toe_lateral: valArchLateral
       };
       state.test.samples.push(sample);
 
@@ -996,37 +1127,37 @@
       // 1. Initial Contact / Heel Strike
       if (normStance < 0.25) {
         const w = Math.sin((normStance / 0.25) * Math.PI);
-        state.sensors['heel'].targetValue = 0.85 * w;
-        state.sensors['midfoot'].targetValue = 0.08 * w;
-        state.sensors['forefoot'].targetValue = 0.05 * w;
-        state.sensors['toe_medial'].targetValue = 0.02 * w;
-        state.sensors['toe_lateral'].targetValue = 0.02 * w;
+        if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.85 * w;
+        if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.04 * w;
+        if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.08 * w;
+        if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.05 * w;
+        if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.02 * w;
       }
       // 2. Loading Response / Midstance
       else if (normStance < 0.60) {
         const sub = (normStance - 0.25) / 0.35;
-        state.sensors['heel'].targetValue = 0.40 * (1 - sub * 0.7);
-        state.sensors['midfoot'].targetValue = 0.32 * Math.sin(sub * Math.PI);
-        state.sensors['forefoot'].targetValue = 0.70 * Math.sin(sub * Math.PI);
-        state.sensors['toe_medial'].targetValue = 0.20 * sub;
-        state.sensors['toe_lateral'].targetValue = 0.15 * sub;
+        if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.40 * (1 - sub * 0.7);
+        if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.18 * Math.sin(sub * Math.PI);
+        if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.35 * Math.sin(sub * Math.PI);
+        if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.70 * Math.sin(sub * Math.PI);
+        if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.22 * sub;
       }
       // 3. Forefoot Push-off & Toe Propulsion
       else {
         const sub = (normStance - 0.60) / 0.40;
-        state.sensors['heel'].targetValue = 0.0;
-        state.sensors['midfoot'].targetValue = 0.05 * (1 - sub);
-        state.sensors['forefoot'].targetValue = 0.82 * Math.cos(sub * Math.PI * 0.5);
-        state.sensors['toe_medial'].targetValue = 0.95 * Math.sin(sub * Math.PI);
-        state.sensors['toe_lateral'].targetValue = 0.70 * Math.sin(sub * Math.PI);
+        if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.0;
+        if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.04 * (1 - sub);
+        if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.06 * (1 - sub);
+        if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.82 * Math.cos(sub * Math.PI * 0.5);
+        if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.95 * Math.sin(sub * Math.PI);
       }
     } else {
       // Swing Phase
-      state.sensors['heel'].targetValue = 0.0;
-      state.sensors['midfoot'].targetValue = 0.0;
-      state.sensors['forefoot'].targetValue = 0.0;
-      state.sensors['toe_medial'].targetValue = 0.0;
-      state.sensors['toe_lateral'].targetValue = 0.0;
+      if (state.sensors['heel']) state.sensors['heel'].targetValue = 0.0;
+      if (state.sensors['arch_medial']) state.sensors['arch_medial'].targetValue = 0.0;
+      if (state.sensors['arch_lateral']) state.sensors['arch_lateral'].targetValue = 0.0;
+      if (state.sensors['forefoot']) state.sensors['forefoot'].targetValue = 0.0;
+      if (state.sensors['toes']) state.sensors['toes'].targetValue = 0.0;
     }
   }
 
@@ -1037,7 +1168,7 @@
     document.getElementById('test-timer').textContent = `${remaining}s`;
     document.getElementById('test-progress-bar').style.width = `${pct}%`;
 
-    const peakHeel = (state.sensors['heel'].peakValue * 100).toFixed(1);
+    const peakHeel = state.sensors['heel'] ? (state.sensors['heel'].peakValue * 100).toFixed(1) : '0.0';
     document.getElementById('test-peak-heel').textContent = `${peakHeel}%`;
   }
 
@@ -1065,17 +1196,15 @@
 
     // Calculate regional impulses
     const samples = state.test.samples;
-    let sumHeel = 0, sumMidfoot = 0, sumForefoot = 0, sumToeMedial = 0, sumToeLateral = 0;
+    let sumHeel = 0, sumMidfoot = 0, sumForefoot = 0, sumToes = 0;
 
     samples.forEach(s => {
       sumHeel += s.heel;
       sumMidfoot += s.midfoot;
       sumForefoot += s.forefoot;
-      sumToeMedial += s.toe_medial;
-      sumToeLateral += s.toe_lateral;
+      sumToes += s.toes;
     });
 
-    const sumToes = sumToeMedial + sumToeLateral;
     const totalLoad = sumHeel + sumMidfoot + sumForefoot + sumToes || 1;
 
     const heelPct = (sumHeel / totalLoad) * 100;
@@ -1389,21 +1518,40 @@ Provide a concise, professional, structured clinical report covering:
     setInterval(updateStatsTicker, 400);
   }
 
-  /* --- Render Loop with Smooth Ease --- */
-  const LERP_FACTOR = 0.22;
+  /* --- Render Loop with Smooth Ease & Frame-Rate Independence --- */
+  let lastFrameTime = performance.now();
+  let lastTerminalFlushTime = 0;
 
-  function renderLoop() {
+  function renderLoop(now) {
     requestAnimationFrame(renderLoop);
+
+    const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
+    lastFrameTime = now;
+
+    // Frame-rate independent exponential smoothing (decay speed = 24)
+    const lerpFactor = 1.0 - Math.exp(-24 * dt);
 
     SENSOR_LOCATIONS.forEach((loc) => {
       const s = state.sensors[loc.id];
-      s.currentValue += LERP_FACTOR * (s.targetValue - s.currentValue);
+      s.currentValue += lerpFactor * (s.targetValue - s.currentValue);
       if (Math.abs(s.currentValue - s.targetValue) < 0.0005) {
         s.currentValue = s.targetValue;
       }
     });
 
     renderer.render();
+
+    // Throttled UI panel update to eliminate layout thrashing
+    if (state.uiDirty) {
+      updateSelectedSensorPanel();
+      state.uiDirty = false;
+    }
+
+    // Throttled serial terminal flush (~10 Hz)
+    if (now - lastTerminalFlushTime > 100) {
+      flushSerialMonitor();
+      lastTerminalFlushTime = now;
+    }
   }
 
   /* --- Handle Incoming Serial Data Packets --- */
@@ -1433,34 +1581,39 @@ Provide a concise, professional, structured clinical report covering:
     s.hasSignal = true;
     s.source = sourceLabel || 'ESP32 (USB Serial)';
 
-    const min = Math.min(state.calibMin, state.calibMax);
-    const max = Math.max(state.calibMin, state.calibMax);
-    const span = Math.max(50, max - min);
-
-    let rawLinear;
-    if (state.invertADC) {
-      rawLinear = (max - rawVal) / span;
-    } else {
-      rawLinear = (rawVal - min) / span;
+    // Auto-capture resting baseline on initial reading if not yet established
+    if (s.baselineADC === null || s.baselineADC === undefined) {
+      s.baselineADC = rawVal;
     }
-    rawLinear = Math.max(0, Math.min(1.0, rawLinear));
 
-    // Velostat piezoresistive compensation & sensitivity curve
+    // Compute delta relative to resting baseline
+    let delta = 0;
+    if (state.invertADC) {
+      // If pressing lowers ADC (resistance drops)
+      delta = s.baselineADC - rawVal;
+    } else {
+      // If pressing raises ADC
+      delta = rawVal - s.baselineADC;
+    }
+
+    // Dynamic active span (range between baseline and limit)
+    const activeSpan = Math.max(300, (state.invertADC ? s.baselineADC : (4095 - s.baselineADC)) || 2200);
+
+    // Resting noise deadzone in ADC counts
+    const deadzoneCounts = activeSpan * state.deadzone;
+
     let normalized = 0.0;
-    const deadzone = state.deadzone;
-    if (rawLinear > deadzone) {
-      const active = (rawLinear - deadzone) / (1.0 - deadzone);
-      // Power curve gamma: higher gamma suppresses hypersensitive light touches
-      const gamma = 1.0 + (1.0 - state.sensitivity) * 2.5;
-      normalized = Math.min(1.0, Math.max(0.0, Math.pow(active, gamma)));
+    if (delta > deadzoneCounts) {
+      const activeRatio = (delta - deadzoneCounts) / Math.max(100, activeSpan - deadzoneCounts);
+      // Power curve gamma: suppresses light resting contact and requires firm foot press
+      const gamma = 1.0 + (1.0 - state.sensitivity) * 2.8;
+      normalized = Math.min(1.0, Math.max(0.0, Math.pow(Math.min(1.0, activeRatio), gamma)));
     }
 
     s.targetValue = normalized;
     if (normalized > s.peakValue) s.peakValue = normalized;
 
-    if (state.selectedSensorId === sensorId) {
-      updateSelectedSensorPanel();
-    }
+    state.uiDirty = true;
   }
 
   /* --- Populate Dropdowns --- */
@@ -1668,18 +1821,28 @@ Provide a concise, professional, structured clinical report covering:
 
       // Automatically switch to Hardware Mode on successful connection
       setMode('hardware');
+
+      // Automatically capture resting baseline tare 1.2s after connection stabilizes
+      clearTimeout(state.autoTareTimeout);
+      state.autoTareTimeout = setTimeout(() => {
+        if (state.hwConnected) {
+          captureBaseline();
+        }
+      }, 1200);
     } else if (status === 'error') {
       dot.className = 'status-dot';
       label.textContent = detail || 'Connection Error';
       if (connLabel) connLabel.textContent = 'Error';
       btn.textContent = 'Connect';
       state.hwConnected = false;
+      clearTimeout(state.autoTareTimeout);
     } else {
       dot.className = 'status-dot';
       label.textContent = 'Disconnected';
       if (connLabel) connLabel.textContent = 'Disconnected';
       btn.textContent = 'Connect';
       state.hwConnected = false;
+      clearTimeout(state.autoTareTimeout);
 
       const term = document.getElementById('serial-terminal-log');
       if (term) term.textContent = 'ESP32 disconnected. Waiting for connection...';
@@ -1707,34 +1870,34 @@ Provide a concise, professional, structured clinical report covering:
     switch (presetName) {
       case 'heel': // Heel strike
         setVal('heel', 0.90);
-        setVal('midfoot', 0.05);
+        setVal('arch_medial', 0.05);
+        setVal('arch_lateral', 0.08);
         setVal('forefoot', 0.00);
-        setVal('toe_medial', 0.00);
-        setVal('toe_lateral', 0.00);
+        setVal('toes', 0.00);
         break;
 
       case 'mid': // Midstance
         setVal('heel', 0.35);
-        setVal('midfoot', 0.30);
+        setVal('arch_lateral', 0.35);
+        setVal('arch_medial', 0.18);
         setVal('forefoot', 0.70);
-        setVal('toe_medial', 0.25);
-        setVal('toe_lateral', 0.20);
+        setVal('toes', 0.22);
         break;
 
       case 'toe': // Toe off
         setVal('heel', 0.00);
-        setVal('midfoot', 0.05);
+        setVal('arch_medial', 0.04);
+        setVal('arch_lateral', 0.06);
         setVal('forefoot', 0.75);
-        setVal('toe_medial', 0.95);
-        setVal('toe_lateral', 0.80);
+        setVal('toes', 0.95);
         break;
 
       case 'full': // Full contact
         setVal('heel', 0.65);
-        setVal('midfoot', 0.25);
+        setVal('arch_lateral', 0.30);
+        setVal('arch_medial', 0.20);
         setVal('forefoot', 0.70);
-        setVal('toe_medial', 0.50);
-        setVal('toe_lateral', 0.45);
+        setVal('toes', 0.50);
         break;
     }
 
@@ -2214,11 +2377,21 @@ Provide a concise, professional, structured clinical report covering:
 
     document.getElementById('btn-calibrate').addEventListener('click', startCalibration);
 
-    // Zero / Tare button: Resets all active pressures to 0 immediately
-    document.getElementById('btn-zero').addEventListener('click', () => {
+    // Baseline Tare / Zero: Captures resting sensor readings as baseline 0%
+    function captureBaseline() {
       SENSOR_LOCATIONS.forEach(loc => {
-        state.sensors[loc.id].targetValue = 0;
-        state.sensors[loc.id].currentValue = 0;
+        const s = state.sensors[loc.id];
+        if (s) {
+          if (s.rawReading !== null && s.rawReading !== undefined) {
+            s.baselineADC = s.rawReading;
+          } else if (state.rawADC > 0) {
+            s.baselineADC = state.rawADC;
+          } else {
+            s.baselineADC = state.invertADC ? 4095 : 0;
+          }
+          s.targetValue = 0.0;
+          s.currentValue = 0.0;
+        }
       });
 
       const slider = document.getElementById('sim-pressure-slider');
@@ -2227,15 +2400,43 @@ Provide a concise, professional, structured clinical report covering:
         document.getElementById('sim-pressure-value').textContent = '0%';
       }
 
-      if (state.invertADC) {
-        state.calibMax = state.rawADC;
-      } else {
-        state.calibMin = state.rawADC;
+      // Auto-detect invertADC if resting ADC is high (>2200 counts)
+      const validBaselines = SENSOR_LOCATIONS.map(l => state.sensors[l.id].baselineADC).filter(v => v !== null && v !== undefined);
+      if (validBaselines.length > 0) {
+        const avg = validBaselines.reduce((a, b) => a + b, 0) / validBaselines.length;
+        if (avg > 2200 && !state.invertADC) {
+          state.invertADC = true;
+        }
       }
+
+      if (state.invertADC) {
+        state.calibMax = state.rawADC || 4095;
+      } else {
+        state.calibMin = state.rawADC || 0;
+      }
+
+      state.baselineTareCaptured = true;
       saveCalibration();
-      document.getElementById('calib-range').textContent = `${state.calibMin} — ${state.calibMax} ${state.invertADC ? '(Inverted)' : ''}`;
+      updateUI();
+
+      const hint = document.getElementById('baseline-status-hint');
+      if (hint) {
+        hint.textContent = 'Baseline Tare Locked: Current resting pressure zeroed out. Pressing sensors will register active load.';
+        hint.style.color = '#22c55e';
+        hint.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+        setTimeout(() => {
+          if (hint) {
+            hint.textContent = 'Baseline Tare Active: Step off or rest insole, then click \'Set Baseline (Tare)\' anytime to re-zero.';
+            hint.style.color = 'var(--text-dim)';
+            hint.style.borderColor = 'var(--border)';
+          }
+        }, 3500);
+      }
+
       updateSelectedSensorPanel();
-    });
+    }
+
+    document.getElementById('btn-zero').addEventListener('click', captureBaseline);
 
     // Reset Peak button
     document.getElementById('btn-reset-peak').addEventListener('click', () => {
